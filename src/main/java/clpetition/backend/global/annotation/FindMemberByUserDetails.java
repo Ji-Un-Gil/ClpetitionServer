@@ -10,8 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 
-@Data
-@RequiredArgsConstructor
 public record FindMemberByUserDetails(
         Member member
 ) implements UserDetails {
