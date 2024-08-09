@@ -61,7 +61,7 @@ public class FileService {
     public void deleteFiles(List<String> imageUrlList) {
         for (String imageUrl: imageUrlList) {
             try {
-                amazonS3Client.deleteObject(bucket, imageUrl.split("/")[4]);
+                amazonS3Client.deleteObject(bucket, imageUrl.split("/")[3] + "/" + imageUrl.split("/")[4]);
             } catch (Exception e) {
                 throw new BaseException(BaseResponseStatus.FILE_SERVER_ERROR);
             }
@@ -93,10 +93,9 @@ public class FileService {
     }
 
     private String putS3(File uploadFile, String fileName) {
-        amazonS3Client.putObject(
-                new PutObjectRequest(bucket, fileName, uploadFile)
-                        .withCannedAcl(CannedAccessControlList.PublicRead)	// PublicRead 권한으로 업로드 됨
-        );
+        PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, fileName, uploadFile)
+                .withCannedAcl(CannedAccessControlList.PublicRead);    // PublicRead 권한으로 업로드 됨
+        amazonS3Client.putObject(putObjectRequest);
         return amazonS3Client.getUrl(bucket, fileName).toString();
     }
 
@@ -115,7 +114,7 @@ public class FileService {
             }
             return Optional.of(convertFile);
         }
-        return Optional.empty();
+        return Optional.of(convertFile);
     }
 }
 

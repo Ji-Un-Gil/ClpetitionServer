@@ -41,7 +41,17 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
                         record.date.year().eq(yearMonth.getYear()),
                         record.date.month().eq(yearMonth.getMonthValue())
                 )
+                .groupBy(record.exerciseTime)
                 .fetch();
+
+        if (results.isEmpty()) {
+            return GetRecordStatisticsPerMonthResponse.builder()
+                    .totalDay(0)
+                    .totalHour(0.0)
+                    .totalSend(0)
+                    .totalGym(0)
+                    .build();
+        }
 
         Double totalHours = results.stream()
                 .map(result -> {
