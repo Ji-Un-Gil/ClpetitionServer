@@ -1,5 +1,6 @@
 package clpetition.backend.record.docs;
 
+import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.record.dto.response.GetRecordDetailsResponse;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Tag(name = "Record API", description = "등반 기록 API")
 public interface GetRecordDetailsApiDocs {
@@ -41,9 +43,9 @@ public interface GetRecordDetailsApiDocs {
     )
     ResponseEntity<BaseResponse<GetRecordDetailsResponse>> getRecordDetails(
             @Parameter(hidden = true)
-            Member member,
+            @FindMember Member member,
 
             @Parameter(description = "등반 기록 ID", example = "2")
-            Long recordId
+            @PathVariable("recordId") Long recordId
     );
 }

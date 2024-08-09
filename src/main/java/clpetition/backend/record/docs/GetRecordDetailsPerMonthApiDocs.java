@@ -1,5 +1,7 @@
 package clpetition.backend.record.docs;
 
+import clpetition.backend.global.annotation.FindMember;
+import clpetition.backend.global.annotation.LocalDatePattern;
 import clpetition.backend.global.response.BaseResponse;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.record.dto.response.GetRecordDetailsResponse;
@@ -9,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,9 +27,9 @@ public interface GetRecordDetailsPerMonthApiDocs {
     )
     ResponseEntity<BaseResponse<Map<LocalDate, List<GetRecordDetailsResponse>>>> getRecordDetailsPerMonth(
             @Parameter(hidden = true)
-            Member member,
+            @FindMember Member member,
 
             @Parameter(description = "탐색할 연도-월", example = "2024-8")
-            String yearMonth
+            @LocalDatePattern(pattern = "yyyy-M") @PathVariable("yearMonth") String yearMonth
     );
 }

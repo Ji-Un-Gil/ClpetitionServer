@@ -1,5 +1,6 @@
 package clpetition.backend.record.docs;
 
+import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
 import clpetition.backend.member.domain.Member;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Tag(name = "Record API", description = "등반 기록 API")
 public interface DeleteRecordApiDocs {
@@ -56,9 +58,9 @@ public interface DeleteRecordApiDocs {
     )
     ResponseEntity<BaseResponse<Void>> deleteRecord(
             @Parameter(hidden = true)
-            Member member,
+            @FindMember Member member,
 
             @Parameter(description = "등반 기록 ID", example = "2")
-            Long recordId
+            @PathVariable("recordId") Long recordId
     );
 }

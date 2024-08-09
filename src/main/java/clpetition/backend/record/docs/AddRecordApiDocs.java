@@ -1,5 +1,6 @@
 package clpetition.backend.record.docs;
 
+import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.record.docs.dto.AddRecordRequestSchema;
@@ -13,8 +14,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -80,7 +83,7 @@ public interface AddRecordApiDocs {
     )
     ResponseEntity<BaseResponse<GetRecordIdResponse>> addRecord(
             @Parameter(hidden = true)
-            Member member,
+            @FindMember Member member,
 
             @Parameter(
                     description = "DTO",
@@ -89,7 +92,7 @@ public interface AddRecordApiDocs {
                             schema = @Schema(implementation = AddRecordRequestSchema.class)
                     )
             )
-            AddRecordRequest addRecordRequest,
+            @Valid @RequestPart("dto") AddRecordRequest addRecordRequest,
 
             @Parameter(
                     description = "첨부 사진",
@@ -97,6 +100,6 @@ public interface AddRecordApiDocs {
                             mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
                     )
             )
-            List<MultipartFile> multipartFileList
+            @RequestPart(value = "images", required = false) List<MultipartFile> multipartFileList
     );
 }
