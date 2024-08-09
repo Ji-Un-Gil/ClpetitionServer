@@ -1,6 +1,6 @@
 package clpetition.backend.member.dto.request;
 
-import clpetition.backend.member.docs.dto.AddMemberAgreementRequestSchema;
+import clpetition.backend.member.docs.dto.request.AddMemberAgreementRequestSchema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 

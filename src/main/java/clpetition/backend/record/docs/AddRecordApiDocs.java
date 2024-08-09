@@ -3,7 +3,7 @@ package clpetition.backend.record.docs;
 import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
 import clpetition.backend.member.domain.Member;
-import clpetition.backend.record.docs.dto.AddRecordRequestSchema;
+import clpetition.backend.record.docs.dto.request.AddRecordRequestSchema;
 import clpetition.backend.record.dto.request.AddRecordRequest;
 import clpetition.backend.record.dto.response.GetRecordIdResponse;
 import io.swagger.v3.oas.annotations.Operation;

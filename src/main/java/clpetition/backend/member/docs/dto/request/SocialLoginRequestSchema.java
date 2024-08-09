@@ -1,7 +1,8 @@
-package clpetition.backend.member.docs.dto;
+package clpetition.backend.member.docs.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "소셜 로그인 요청")
 public interface SocialLoginRequestSchema {
 
     @Schema(description = "소셜 식별자(ID)", example = "123456789")

@@ -1,6 +1,7 @@
 package clpetition.backend.record.dto.response;
 
 import clpetition.backend.gym.dto.response.GetGymDetailsResponse;
+import clpetition.backend.record.docs.dto.response.GetRecordDetailsResponseSchema;
 import clpetition.backend.record.domain.Difficulties;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Builder
-public class GetRecordDetailsResponse {
+public class GetRecordDetailsResponse implements GetRecordDetailsResponseSchema {
     private Long id;
 
     private GetGymDetailsResponse gym;

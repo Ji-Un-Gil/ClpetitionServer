@@ -1,10 +1,11 @@
-package clpetition.backend.record.docs.dto;
+package clpetition.backend.record.docs.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 import java.util.Map;
 
+@Schema(description = "등반 기록 저장 요청")
 public interface AddRecordRequestSchema {
 
     @Schema(description = "기록 날짜", example = "2024-08-09")

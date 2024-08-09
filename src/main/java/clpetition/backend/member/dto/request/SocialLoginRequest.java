@@ -1,6 +1,6 @@
 package clpetition.backend.member.dto.request;
 
-import clpetition.backend.member.docs.dto.SocialLoginRequestSchema;
+import clpetition.backend.member.docs.dto.request.SocialLoginRequestSchema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 

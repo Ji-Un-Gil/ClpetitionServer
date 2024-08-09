@@ -19,6 +19,7 @@ import java.util.Map;
 
 @Tag(name = "Record API", description = "등반 기록 API")
 public interface GetRecordDetailsPerMonthApiDocs {
+
     @Operation(summary = "월 등반 기록 상세조회", description = "월 등반 기록의 세부 정보를 리스트 형태로 조회합니다.")
     @ApiResponses(
             value = {
