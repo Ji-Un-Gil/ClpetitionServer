@@ -1,4 +1,4 @@
-package clpetition.backend.record.controller.dto.response;
+package clpetition.backend.record.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

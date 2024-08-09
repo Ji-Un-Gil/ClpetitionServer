@@ -1,11 +1,13 @@
-package clpetition.backend.record.controller.dto.request;
+package clpetition.backend.record.dto.request;
 
 import clpetition.backend.global.annotation.LocalDatePattern;
 import clpetition.backend.global.annotation.LocalTimePattern;
 import clpetition.backend.gym.domain.Difficulty;
+import clpetition.backend.record.docs.dto.AddRecordRequestSchema;
 import clpetition.backend.record.domain.Difficulties;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +21,7 @@ import java.util.stream.Collectors;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddRecordRequest {
+public class AddRecordRequest implements AddRecordRequestSchema {
     @LocalDatePattern
     @NotBlank(message = "등반일은 필수입니다")
     String date;
@@ -37,6 +39,7 @@ public class AddRecordRequest {
     String memo;
 
     @NotNull(message = "오늘 만족도는 필수입니다")
+    @Size(min = 1, max = 5, message = "오늘 만족도의 범위는 1 ~ 5 입니다")
     Integer satisfaction;
 
     @Builder.Default
