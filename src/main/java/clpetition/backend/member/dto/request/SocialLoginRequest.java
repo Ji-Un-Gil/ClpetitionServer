@@ -1,5 +1,6 @@
 package clpetition.backend.member.dto.request;
 
+import clpetition.backend.member.docs.dto.SocialLoginRequestSchema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
@@ -15,5 +16,5 @@ public record SocialLoginRequest(
         String phoneNumber,
         String profileImage,
         String fcmToken
-) {
+) implements SocialLoginRequestSchema {
 }

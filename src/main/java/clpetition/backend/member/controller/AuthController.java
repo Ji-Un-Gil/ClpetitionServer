@@ -4,6 +4,9 @@ import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseException;
 import clpetition.backend.global.response.BaseResponse;
 import clpetition.backend.global.response.BaseResponseStatus;
+import clpetition.backend.member.docs.AddMemberAgreementApiDocs;
+import clpetition.backend.member.docs.SocialLoginApiDocs;
+import clpetition.backend.member.dto.request.AddMemberAgreementRequest;
 import clpetition.backend.member.dto.request.SocialLoginRequest;
 import clpetition.backend.member.dto.response.SocialLoginResponse;
 import clpetition.backend.member.domain.Member;
@@ -20,7 +23,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
-public class AuthController {
+public class AuthController implements
+        SocialLoginApiDocs,
+        AddMemberAgreementApiDocs {
 
     private final AuthService authService;
 
@@ -32,6 +37,15 @@ public class AuthController {
         if (socialLoginResponse.role() == null)
             return BaseResponse.toResponseEntityContainsStatusAndResult(BaseResponseStatus.CREATED, socialLoginResponse);
         return BaseResponse.toResponseEntityContainsResult(socialLoginResponse);
+    }
+
+    @PostMapping("/agreement")
+    public ResponseEntity<BaseResponse<Void>> addMemberAgreement(
+            @FindMember Member member,
+            @Valid @RequestBody AddMemberAgreementRequest addMemberAgreementRequest
+    ) {
+        authService.addMemberAgreement(member, addMemberAgreementRequest);
+        return BaseResponse.toResponseEntityContainsStatus(BaseResponseStatus.SUCCESS);
     }
 
     @GetMapping("/duplicated")
