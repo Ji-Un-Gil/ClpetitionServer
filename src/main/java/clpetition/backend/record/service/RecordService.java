@@ -14,6 +14,7 @@ import clpetition.backend.record.dto.response.GetRecordIdResponse;
 import clpetition.backend.record.dto.response.GetRecordStatisticsPerMonthResponse;
 import clpetition.backend.record.repository.RecordRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,7 +38,7 @@ public class RecordService {
     private final RecordRepository recordRepository;
 
     private final String DATE_PATTERN = "yyyy-M-d";
-    private final String TIME_PATTERN = "hh:mm";
+    private final String TIME_PATTERN = "HH:mm";
     private final String IMAGE_DIR = "record";
 
     /**
@@ -57,6 +58,7 @@ public class RecordService {
     @Transactional(readOnly = true)
     public GetRecordDetailsResponse getRecordDetails(Member member, Long recordId) {
         Record record = getRecordWithValidation(member, recordId);
+        Hibernate.initialize(record.getImages());
         return toGetRecordDetailsResponse(record);
     }
 
