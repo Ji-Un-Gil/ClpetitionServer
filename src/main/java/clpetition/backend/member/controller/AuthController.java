@@ -4,8 +4,8 @@ import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseException;
 import clpetition.backend.global.response.BaseResponse;
 import clpetition.backend.global.response.BaseResponseStatus;
-import clpetition.backend.member.controller.dto.request.SocialLoginRequest;
-import clpetition.backend.member.controller.dto.response.SocialLoginResponse;
+import clpetition.backend.member.dto.request.SocialLoginRequest;
+import clpetition.backend.member.dto.response.SocialLoginResponse;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.service.AuthService;
 import jakarta.validation.Valid;
@@ -25,7 +25,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("")
-    public ResponseEntity<BaseResponse> socialLogin(
+    public ResponseEntity<BaseResponse<SocialLoginResponse>> socialLogin(
             @Valid @RequestBody SocialLoginRequest socialLoginRequest
     ) {
         SocialLoginResponse socialLoginResponse = authService.socialLogin(socialLoginRequest);
@@ -35,7 +35,7 @@ public class AuthController {
     }
 
     @GetMapping("/duplicated")
-    public ResponseEntity<BaseResponse> checkNickname(
+    public ResponseEntity<BaseResponse<Void>> checkNickname(
             @FindMember Member member,
             @RequestParam("nickname")
             @NotBlank(message = "닉네임을 입력해주세요")
@@ -48,14 +48,14 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<BaseResponse> logout(@FindMember Member member
+    public ResponseEntity<BaseResponse<Void>> logout(@FindMember Member member
     ) {
         authService.logout(member);
         return BaseResponse.toResponseEntityContainsStatus(BaseResponseStatus.SUCCESS);
     }
 
     @PostMapping("/fcm")
-    public ResponseEntity<BaseResponse> addFcmToken(
+    public ResponseEntity<BaseResponse<Void>> addFcmToken(
             @FindMember Member member,
             @RequestParam("token")
             @NotBlank(message = "fcm token을 입력해주세요")

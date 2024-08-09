@@ -1,7 +1,7 @@
 package clpetition.backend.member.service;
 
-import clpetition.backend.member.controller.dto.request.SocialLoginRequest;
-import clpetition.backend.member.controller.dto.response.SocialLoginResponse;
+import clpetition.backend.member.dto.request.SocialLoginRequest;
+import clpetition.backend.member.dto.response.SocialLoginResponse;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.domain.Role;
 import clpetition.backend.member.domain.SocialType;

@@ -1,4 +1,4 @@
-package clpetition.backend.member.controller.dto.request;
+package clpetition.backend.member.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;

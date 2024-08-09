@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     private static final List<String> NO_CHECK_URL_LIST = List.of(
-            "/health", "/css", "/image", "/js", "/favicon.ico", "/swagger", "/docs", "/swagger-ui", "/v3/api-docs", "/error"); // Filter 작동 X
+            "/health", "/css", "/image", "/js", "/favicon.ico", "/swagger", "/docs", "/swagger-ui", "/v3/api-docs", "/error", "/auth"); // Filter 작동 X
 
     private final JwtService jwtService;
     private final MemberRepository memberRepository;
@@ -175,8 +175,8 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
      */
     public void saveAuthentication(Member myMember) {
         UserDetails userDetailsUser = org.springframework.security.core.userdetails.User.builder()
-                .username(myMember.getSocialType().toString())    // socialType
-                .password(myMember.getSocialId())                 // socialId
+                .username(myMember.getId().toString())  // Id
+                .password(myMember.getSocialId())       // socialId
                 .roles(myMember.getRole().name())
                 .build();
 

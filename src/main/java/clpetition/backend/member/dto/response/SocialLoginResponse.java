@@ -1,4 +1,4 @@
-package clpetition.backend.member.controller.dto.response;
+package clpetition.backend.member.dto.response;
 
 import lombok.Builder;
 
