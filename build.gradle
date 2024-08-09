@@ -43,12 +43,25 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+	// Querydsl
+	implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
+	implementation "com.querydsl:querydsl-apt:5.0.0:jakarta"
+	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
 	// RandomString
 	implementation 'org.apache.commons:commons-lang3:3.12.0'
 
 	// Redis
 	implementation 'it.ozimov:embedded-redis:0.7.2'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// S3
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+	// Swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
 
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
