@@ -1,5 +1,6 @@
 package clpetition.backend.global.response;
 
+import clpetition.backend.global.docs.BaseResponseSchema;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Builder;
@@ -11,17 +12,20 @@ import static clpetition.backend.global.response.BaseResponseStatus.SUCCESS;
 @Data
 @Builder
 @JsonPropertyOrder({"code", "message", "result"})
-public class BaseResponse {
+public class BaseResponse<T> implements BaseResponseSchema<T> {
+
     private final String code;
+
     private final String message;
+
     @JsonInclude(JsonInclude.Include.ALWAYS)
-    private Object result;
+    private T result;
 
     // Valid Handling
-    public static ResponseEntity<BaseResponse> toResponseEntityContainsCustomMessage(BaseResponseStatus baseResponseStatus, String message) {
+    public static <T> ResponseEntity<BaseResponse<T>> toResponseEntityContainsCustomMessage(BaseResponseStatus baseResponseStatus, String message) {
         return ResponseEntity
                 .status(baseResponseStatus.getStatus())
-                .body(BaseResponse.builder()
+                .body(BaseResponse.<T>builder()
                         .code(baseResponseStatus.getCode())
                         .message(message)
                         .result(null)
@@ -29,17 +33,17 @@ public class BaseResponse {
     }
 
     // Http Status만 Response로 반환하는 경우 (DELETE)
-    public static ResponseEntity<BaseResponse> toResponseEntity(BaseResponseStatus baseResponseStatus) {
+    public static <T> ResponseEntity<BaseResponse<T>> toResponseEntity(BaseResponseStatus baseResponseStatus) {
         return ResponseEntity
                 .status(baseResponseStatus.getStatus())
                 .body(null);
     }
 
     // Http Status만 Response로 반환하는 경우
-    public static ResponseEntity<BaseResponse> toResponseEntityContainsStatus(BaseResponseStatus baseResponseStatus) {
+    public static <T> ResponseEntity<BaseResponse<T>> toResponseEntityContainsStatus(BaseResponseStatus baseResponseStatus) {
         return ResponseEntity
                 .status(baseResponseStatus.getStatus())
-                .body(BaseResponse.builder()
+                .body(BaseResponse.<T>builder()
                         .code(baseResponseStatus.getCode())
                         .message(baseResponseStatus.getMessage())
                         .result(null)
@@ -47,10 +51,10 @@ public class BaseResponse {
     }
 
     // Http Status 200, Result가 존재하는 Response로 반환하는 경우
-    public static ResponseEntity<BaseResponse> toResponseEntityContainsResult(Object result) {
+    public static <T> ResponseEntity<BaseResponse<T>> toResponseEntityContainsResult(T result) {
         return ResponseEntity
                 .status(SUCCESS.getStatus())
-                .body(BaseResponse.builder()
+                .body(BaseResponse.<T>builder()
                         .code(SUCCESS.getCode())
                         .message(SUCCESS.getMessage())
                         .result(result)
@@ -58,10 +62,10 @@ public class BaseResponse {
     }
 
     // 200 이외의 Status, Result가 존재하는 Response로 반환하는 경우
-    public static ResponseEntity<BaseResponse> toResponseEntityContainsStatusAndResult(BaseResponseStatus baseResponseStatus, Object result) {
+    public static <T> ResponseEntity<BaseResponse<T>> toResponseEntityContainsStatusAndResult(BaseResponseStatus baseResponseStatus, T result) {
         return ResponseEntity
                 .status(baseResponseStatus.getStatus())
-                .body(BaseResponse.builder()
+                .body(BaseResponse.<T>builder()
                         .code(baseResponseStatus.getCode())
                         .message(baseResponseStatus.getMessage())
                         .result(result)

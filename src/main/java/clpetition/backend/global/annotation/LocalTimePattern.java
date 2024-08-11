@@ -22,5 +22,5 @@ public @interface LocalTimePattern {
 
     Class<? extends Payload>[] payload() default { };
 
-    String pattern() default "hh:mm";
+    String pattern() default "HH:mm";
 }
