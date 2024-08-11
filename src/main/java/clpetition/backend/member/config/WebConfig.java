@@ -1,6 +1,7 @@
 package clpetition.backend.member.config;
 
 import clpetition.backend.global.annotation.FindMemberArgumentResolver;
+import io.swagger.v3.oas.models.servers.Server;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -19,7 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(final CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:8080")
+                .allowedOrigins("https://clpetition-server.shop/", "https://www.clpetition-server.shop/", "http://localhost:8080")
                 .allowedMethods("GET", "POST", "DELETE", "PATCH", "PUT", "OPTIONS")
                 .maxAge(3000);
     }
