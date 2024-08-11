@@ -41,6 +41,9 @@ public enum BaseResponseStatus implements BaseResponseStatusImpl {
     INVALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "AUTH_002", "비밀번호 형식이 올바르지 않습니다."),
     DUPLICATED_NICKNAME(HttpStatus.CONFLICT, "AUTH_003", "해당 닉네임은 중복입니다."),
 
+    // File
+    FILE_CONVERT_FAILED_ERROR(HttpStatus.BAD_REQUEST, "FILE_001", "파일 변환에 실패했습니다."),
+
     // Member
     MEMBER_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "MEMBER_001", "존재하지 않는 사용자입니다."),
     MEMBER_STATUS_NOT_VALID_ERROR(HttpStatus.NOT_FOUND, "MEMBER_002", "이미 삭제된 회원입니다"),
@@ -49,16 +52,14 @@ public enum BaseResponseStatus implements BaseResponseStatusImpl {
     // Gym
     GYM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "GYM_001", "존재하지 않는 암장입니다."),
 
+    // FavoriteGym
+    FAVORITE_GYM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "FAVORITE_GYM_001", "해당 암장은 즐겨찾기 등록이 되어있지 않습니다."),
+
     // Difficulty
     DIFFICULTY_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "DIFFICULTY_001", "존재하지 않는 난이도입니다."),
 
-    // Diary
-    WORKTYPE_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "DIARY_001", "존재하지 않는 근무 형태입니다."),
-    DIARY_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "DIARY_002", "존재하지 않는 근무 일지입니다."),
-    DIARY_USER_NOT_MATCH_ERROR(HttpStatus.NOT_FOUND, "DIARY_003", "사용자의 근무 일지가 아닙니다."),
-    JOB_USER_NOT_MATCH_ERROR(HttpStatus.NOT_FOUND, "DIARY_004", "입력하신 직업과 사용자의 직업이 일치하지 않습니다."),
-    DIARY_ALREADY_EXISTS_ERROR(HttpStatus.NOT_FOUND, "DIARY_005", "이미 근무 일지가 존재하는 날짜입니다."),
-    CANT_BOAST_DIARY_ERROR(HttpStatus.BAD_REQUEST, "DIARY_006", "해당 근무 일지는 자랑하기 기능을 이용할 수 없습니다."),
+    // Record
+    RECORD_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "RECORD_001", "존재하지 않는 기록입니다."),
 
     // Notice
     NOTICE_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "NOTICE_001", "존재하지 않는 공지입니다."),
@@ -73,6 +74,9 @@ public enum BaseResponseStatus implements BaseResponseStatusImpl {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "RESPONSE_ERROR_001", "서버와의 연결에 실패했습니다."),
     BAD_GATEWAY(HttpStatus.BAD_GATEWAY, "RESPONSE_ERROR_002", "다른 서버로부터 잘못된 응답이 수신되었습니다."),
     INSUFFICIENT_STORAGE(HttpStatus.INSUFFICIENT_STORAGE, "RESPONSE_ERROR_003", "서버의 용량이 부족해 요청에 실패했습니다."),
+
+    // File
+    FILE_SERVER_ERROR(HttpStatus.BAD_GATEWAY, "FILE_002", "파일 서버의 문제로 작업에 실패했습니다."),
     ;
 
     private final HttpStatus status;

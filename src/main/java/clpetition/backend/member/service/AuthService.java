@@ -1,7 +1,8 @@
 package clpetition.backend.member.service;
 
-import clpetition.backend.member.controller.dto.request.SocialLoginRequest;
-import clpetition.backend.member.controller.dto.response.SocialLoginResponse;
+import clpetition.backend.member.dto.request.AddMemberAgreementRequest;
+import clpetition.backend.member.dto.request.SocialLoginRequest;
+import clpetition.backend.member.dto.response.SocialLoginResponse;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.domain.Role;
 import clpetition.backend.member.domain.SocialType;
@@ -70,6 +71,11 @@ public class AuthService {
                 .build();
     }
 
+    public void addMemberAgreement(Member member, AddMemberAgreementRequest addMemberAgreementRequest) {
+        member.updateAgreement(addMemberAgreementRequest.marketingAgree(), addMemberAgreementRequest.pushAgree());
+        memberRepository.save(member);
+    }
+
     public boolean checkNickname(Member member, String nickname) {
         if (member.getRole().equals(Role.USER) && member.getNickname().equals(nickname))
             return false;
@@ -126,7 +132,7 @@ public class AuthService {
                 .email(email)
                 .phoneNumber(phoneNumber)
                 .profileImage(profileImage)
-                .role(Role.GUEST)
+                .role(Role.USER)
                 .build();
     }
 

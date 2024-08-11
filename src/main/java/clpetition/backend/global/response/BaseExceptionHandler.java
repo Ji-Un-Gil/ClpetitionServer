@@ -23,7 +23,7 @@ public class BaseExceptionHandler {
      * @valid  유효성 체크에 통과하지 못하면 MethodArgumentNotValidException이 발생한다.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<BaseResponse> methodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseEntity<BaseResponse<Void>> methodArgumentNotValidException(MethodArgumentNotValidException e) {
         String validExceptionMessage = getValidExceptionMessage(e.getBindingResult());
         return BaseResponse.toResponseEntityContainsCustomMessage(BaseResponseStatus.INVALID_INPUT_VALUE, validExceptionMessage);
     }
@@ -32,7 +32,7 @@ public class BaseExceptionHandler {
      * @validated  유효성 체크에 통과하지 못하면 MethodArgumentNotValidException이 발생한다.
      */
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<BaseResponse> constraintViolationException(ConstraintViolationException e) {
+    public ResponseEntity<BaseResponse<Void>> constraintViolationException(ConstraintViolationException e) {
         String validExceptionMessage = e.getMessage().split(": ")[1];
         return BaseResponse.toResponseEntityContainsCustomMessage(BaseResponseStatus.INVALID_INPUT_VALUE, validExceptionMessage);
     }
@@ -41,7 +41,7 @@ public class BaseExceptionHandler {
      * @PreAuthorize  권한 인가에 통과하지 못하면 AccessDeniedException이 발생한다.
      */
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<BaseResponse> accessDeniedException(AccessDeniedException e) {
+    public ResponseEntity<BaseResponse<Void>> accessDeniedException(AccessDeniedException e) {
         String preAuthorizeExceptionMessage = e.getMessage();
         return BaseResponse.toResponseEntityContainsCustomMessage(BaseResponseStatus.INVALID_AUTHORIZATION, preAuthorizeExceptionMessage);
     }
@@ -50,7 +50,7 @@ public class BaseExceptionHandler {
      *   BaseException은 그대로 처리한다.
      */
     @ExceptionHandler(BaseException.class)
-    protected ResponseEntity<BaseResponse> handleBaseException(BaseException e) {
+    protected ResponseEntity<BaseResponse<Void>> handleBaseException(BaseException e) {
         return BaseResponse.toResponseEntityContainsStatus(e.errorStatus);
     }
 

@@ -55,7 +55,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         for (String NO_CHECK_URL: NO_CHECK_URL_LIST) {
-            if (request.getRequestURI().contains(NO_CHECK_URL) || request.getRequestURI().equals("/member")) {
+            if (request.getRequestURI().contains(NO_CHECK_URL) || request.getRequestURI().equals("/auth")) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -175,8 +175,8 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
      */
     public void saveAuthentication(Member myMember) {
         UserDetails userDetailsUser = org.springframework.security.core.userdetails.User.builder()
-                .username(myMember.getSocialType().toString())    // socialType
-                .password(myMember.getSocialId())                 // socialId
+                .username(myMember.getId().toString())  // Id
+                .password(myMember.getSocialId())       // socialId
                 .roles(myMember.getRole().name())
                 .build();
 

@@ -4,8 +4,11 @@ import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseException;
 import clpetition.backend.global.response.BaseResponse;
 import clpetition.backend.global.response.BaseResponseStatus;
-import clpetition.backend.member.controller.dto.request.SocialLoginRequest;
-import clpetition.backend.member.controller.dto.response.SocialLoginResponse;
+import clpetition.backend.member.docs.AddMemberAgreementApiDocs;
+import clpetition.backend.member.docs.SocialLoginApiDocs;
+import clpetition.backend.member.dto.request.AddMemberAgreementRequest;
+import clpetition.backend.member.dto.request.SocialLoginRequest;
+import clpetition.backend.member.dto.response.SocialLoginResponse;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.service.AuthService;
 import jakarta.validation.Valid;
@@ -20,12 +23,14 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
-public class AuthController {
+public class AuthController implements
+        SocialLoginApiDocs,
+        AddMemberAgreementApiDocs {
 
     private final AuthService authService;
 
     @PostMapping("")
-    public ResponseEntity<BaseResponse> socialLogin(
+    public ResponseEntity<BaseResponse<SocialLoginResponse>> socialLogin(
             @Valid @RequestBody SocialLoginRequest socialLoginRequest
     ) {
         SocialLoginResponse socialLoginResponse = authService.socialLogin(socialLoginRequest);
@@ -34,8 +39,17 @@ public class AuthController {
         return BaseResponse.toResponseEntityContainsResult(socialLoginResponse);
     }
 
+    @PostMapping("/agreement")
+    public ResponseEntity<BaseResponse<Void>> addMemberAgreement(
+            @FindMember Member member,
+            @Valid @RequestBody AddMemberAgreementRequest addMemberAgreementRequest
+    ) {
+        authService.addMemberAgreement(member, addMemberAgreementRequest);
+        return BaseResponse.toResponseEntityContainsStatus(BaseResponseStatus.SUCCESS);
+    }
+
     @GetMapping("/duplicated")
-    public ResponseEntity<BaseResponse> checkNickname(
+    public ResponseEntity<BaseResponse<Void>> checkNickname(
             @FindMember Member member,
             @RequestParam("nickname")
             @NotBlank(message = "닉네임을 입력해주세요")
@@ -48,14 +62,14 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<BaseResponse> logout(@FindMember Member member
+    public ResponseEntity<BaseResponse<Void>> logout(@FindMember Member member
     ) {
         authService.logout(member);
         return BaseResponse.toResponseEntityContainsStatus(BaseResponseStatus.SUCCESS);
     }
 
     @PostMapping("/fcm")
-    public ResponseEntity<BaseResponse> addFcmToken(
+    public ResponseEntity<BaseResponse<Void>> addFcmToken(
             @FindMember Member member,
             @RequestParam("token")
             @NotBlank(message = "fcm token을 입력해주세요")
