@@ -9,4 +9,5 @@ import java.util.Optional;
 
 public interface FavoriteGymRepository extends JpaRepository<FavoriteGym, Long> {
     Optional<FavoriteGym> findByMemberAndGym(Member member, Gym gym);
+    boolean existsByMemberAndGym(Member member, Gym gym);
 }

@@ -28,7 +28,7 @@ public class AddRecordRequest implements AddRecordRequestSchema {
     Long gymId;
 
     @NotNull(message = "문제 난이도는 최소 1개 이상 선택되어야 합니다")
-    List<Map<String, Integer>> difficulties;
+    Map<String, Integer> difficulties;
 
     @LocalTimePattern
     @Builder.Default
@@ -45,10 +45,8 @@ public class AddRecordRequest implements AddRecordRequestSchema {
     Boolean isPrivate = false;
 
     public List<Difficulties> convertDifficulties() {
-        return difficulties.stream()
-                .flatMap(map -> map.entrySet().stream()
-                        .map(entry -> new Difficulties(Difficulty.findByKey(entry.getKey()), entry.getValue()))
-                        )
+        return difficulties.entrySet().stream()
+                .map(entry -> new Difficulties(Difficulty.findByKey(entry.getKey()), entry.getValue()))
                 .collect(Collectors.toList());
     }
 }

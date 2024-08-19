@@ -21,7 +21,8 @@ public class FavoriteGymService {
     /**
      * 암장 관심 등록
      * */
-    public void addFavoriteGym(Member member, Gym gym) {
+    public void addFavoriteGym(Member member, Long gymId) {
+        Gym gym = gymService.getGym(gymId);
         saveFavoriteGym(member, gym);
         gymService.increaseFavoriteGym(gym);
     }
@@ -29,10 +30,18 @@ public class FavoriteGymService {
     /**
      * 암장 관심 해제
      * */
-    public void deleteFavoriteGym(Member member, Gym gym) {
+    public void deleteFavoriteGym(Member member, Long gymId) {
+        Gym gym = gymService.getGym(gymId);
         FavoriteGym favoriteGym = getFavoriteGym(member, gym);
         gymService.decreaseFavoriteGym(gym);
         deleteFavoriteGym(favoriteGym);
+    }
+
+    /**
+     * 암장 관심 등록 여부 가져오기
+     * */
+    public boolean isFavoriteGym(Member member, Gym gym) {
+        return isExistFavoriteGym(member, gym);
     }
 
     /**
@@ -61,5 +70,12 @@ public class FavoriteGymService {
      * */
     private void deleteFavoriteGym(FavoriteGym favoriteGym) {
         favoriteGymRepository.deleteById(favoriteGym.getId());
+    }
+
+    /**
+     * 암장 관심 등록 여부 가져오기
+     * */
+    private boolean isExistFavoriteGym(Member member, Gym gym) {
+        return favoriteGymRepository.existsByMemberAndGym(member, gym);
     }
 }

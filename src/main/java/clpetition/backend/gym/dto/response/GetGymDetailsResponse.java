@@ -5,8 +5,7 @@ import lombok.Builder;
 
 @Builder
 public record GetGymDetailsResponse(
-        Long id,
-        String brand,
-        String branch
+        Long gymId,
+        String gymName
 ) implements GetGymDetailsResponseSchema {
 }

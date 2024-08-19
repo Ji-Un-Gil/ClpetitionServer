@@ -7,6 +7,7 @@ import clpetition.backend.global.response.BaseResponseStatus;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.record.docs.*;
 import clpetition.backend.record.dto.request.AddRecordRequest;
+import clpetition.backend.record.dto.response.GetGymInfoAndRelatedRecordResponse;
 import clpetition.backend.record.dto.response.GetRecordDetailsResponse;
 import clpetition.backend.record.dto.response.GetRecordIdResponse;
 import clpetition.backend.record.dto.response.GetRecordStatisticsPerMonthResponse;
@@ -19,11 +20,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -38,7 +37,8 @@ public class RecordController implements
         ChangeRecordApiDocs,
         DeleteRecordApiDocs,
         GetRecordStatisticsPerMonthApiDocs,
-        GetRecordDetailsPerMonthApiDocs {
+        GetRecordDetailsPerMonthApiDocs,
+        GetGymInfoAndRelatedRecordApiDocs {
 
     private final RecordService recordService;
 
@@ -91,11 +91,20 @@ public class RecordController implements
     }
 
     @GetMapping("/month/{yearMonth}")
-    public ResponseEntity<BaseResponse<Map<LocalDate, List<GetRecordDetailsResponse>>>> getRecordDetailsPerMonth(
+    public ResponseEntity<BaseResponse<List<GetRecordDetailsResponse>>> getRecordDetailsPerMonth(
             @FindMember Member member,
             @LocalDatePattern(pattern = "yyyy-M") @PathVariable("yearMonth") String yearMonth
     ) {
         return BaseResponse.toResponseEntityContainsResult
                 (recordService.getRecordDetailsPerMonth(member, YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-M"))));
+    }
+
+    @GetMapping("/related/{gymId}")
+    public ResponseEntity<BaseResponse<GetGymInfoAndRelatedRecordResponse>> getGymInfoAndRelatedRecord(
+            @FindMember Member member,
+            @PathVariable("gymId") Long gymId
+    ) {
+        return BaseResponse.toResponseEntityContainsResult
+                (recordService.getGymInfoAndRelatedRecord(member, gymId));
     }
 }

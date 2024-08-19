@@ -6,11 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public interface GetGymDetailsResponseSchema {
 
     @Schema(description = "암장 ID", example = "10")
-    Long id();
+    Long gymId();
 
-    @Schema(description = "암장 브랜드명", example = "더클라임")
-    String brand();
-
-    @Schema(description = "암장 지점명", example = "연남점")
-    String branch();
+    @Schema(description = "암장명", example = "더클라임 연남점")
+    String gymName();
 }

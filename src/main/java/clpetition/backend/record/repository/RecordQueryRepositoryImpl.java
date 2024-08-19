@@ -1,8 +1,10 @@
 package clpetition.backend.record.repository;
 
+import clpetition.backend.gym.domain.Gym;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.record.domain.Record;
 import clpetition.backend.record.dto.response.GetRecordStatisticsPerMonthResponse;
+import clpetition.backend.record.dto.response.GetRelatedRecordResponse;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +26,13 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
+    private final Integer RELATED_RECORD_SIZE = 9;
+
     @Override
     public GetRecordStatisticsPerMonthResponse findRecordStatisticsPerMonth(Member member, YearMonth yearMonth) {
-        List<Tuple> results = jpaQueryFactory
+        Tuple result = jpaQueryFactory
                 .select(
-                        record.count(),
-                        record.exerciseTime,
+                        record.date.countDistinct(),
                         difficulties.value.sum(),
                         record.gym.countDistinct()
                 )
@@ -41,33 +44,24 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
                         record.date.year().eq(yearMonth.getYear()),
                         record.date.month().eq(yearMonth.getMonthValue())
                 )
-                .groupBy(record.exerciseTime)
+                .fetchOne();
+
+        List<Record> records = jpaQueryFactory
+                .selectFrom(record)
+                .where(
+                        record.member.eq(member),
+                        record.date.year().eq(yearMonth.getYear()),
+                        record.date.month().eq(yearMonth.getMonthValue())
+                )
                 .fetch();
 
-        if (results.isEmpty()) {
-            return GetRecordStatisticsPerMonthResponse.builder()
-                    .totalDay(0)
-                    .totalHour(0.0)
-                    .totalSend(0)
-                    .totalGym(0)
-                    .build();
-        }
-
-        Double totalHours = results.stream()
-                .map(result -> {
-                    LocalTime exerciseTime = result.get(record.exerciseTime);
-                    if (exerciseTime == null)
-                        return 0L;
-                    return Duration.between(LocalTime.MIN, exerciseTime).getSeconds();
-                })
+        Double totalHours = records.stream()
+                .map(record -> Duration.between(LocalTime.MIN, record.getExerciseTime()).getSeconds())
                 .mapToLong(Long::longValue)
-                .sum()
-                / 3600.0;
-
-        Tuple result = results.get(0);
+                .sum() / 3600.0;
 
         return GetRecordStatisticsPerMonthResponse.builder()
-                .totalDay(Optional.ofNullable(result.get(record.count())).orElse(0L).intValue())
+                .totalDay(Optional.ofNullable(result.get(record.date.countDistinct())).orElse(0L).intValue())
                 .totalHour(totalHours)
                 .totalSend(Optional.ofNullable(result.get(difficulties.value.sum())).orElse(0))
                 .totalGym(Optional.ofNullable(result.get(record.gym.countDistinct())).orElse(0L).intValue())
@@ -84,5 +78,29 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
                         record.date.month().eq(yearMonth.getMonthValue())
                 )
                 .fetch();
+    }
+
+    @Override
+    public List<GetRelatedRecordResponse> findRelatedRecord(Gym gym) {
+        List<Record> records = jpaQueryFactory
+                .selectFrom(record)
+                .where(
+                        record.gym.eq(gym),
+                        record.images.isNotEmpty()
+                )
+                .orderBy(record.date.desc())
+                .limit(RELATED_RECORD_SIZE)
+                .fetch();
+
+        return records.stream()
+                .map(record -> {
+                    List<String> images = record.getImages();
+                    String thumbnail = images.get(0);
+                    return GetRelatedRecordResponse.builder()
+                            .recordId(record.getId())
+                            .thumbnail(thumbnail)
+                            .build();
+                })
+                .toList();
     }
 }
