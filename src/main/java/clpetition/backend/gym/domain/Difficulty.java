@@ -17,6 +17,9 @@ public enum Difficulty {
     GRAY("회색", "V6-7"),
     BROWN("갈색", "V7-8"),
     BLACK("검정", "V8+"),
+    PINK("분홍", "V8+"),
+    NAVY("남색", "V8+"),
+    WHITE("흰색", "V8+"),
     ;
 
     private final String key;
