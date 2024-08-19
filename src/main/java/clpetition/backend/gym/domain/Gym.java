@@ -17,9 +17,9 @@ public class Gym extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String brand;
+    private String name;
 
-    private String branch;
+    private String region;
 
     private String address;
 
