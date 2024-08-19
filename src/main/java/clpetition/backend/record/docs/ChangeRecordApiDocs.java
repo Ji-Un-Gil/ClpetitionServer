@@ -40,7 +40,7 @@ public interface ChangeRecordApiDocs {
                                                 "code": "CREATED",
                                                 "message": "요청에 성공했으며 리소스가 정상적으로 생성되었습니다.",
                                                 "result": {
-                                                    "id": 0
+                                                    "recordId": 0
                                                 }
                                             }
                                             """

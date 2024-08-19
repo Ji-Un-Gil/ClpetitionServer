@@ -4,10 +4,14 @@ import clpetition.backend.global.response.BaseException;
 import clpetition.backend.global.response.BaseResponseStatus;
 import clpetition.backend.gym.domain.Gym;
 import clpetition.backend.gym.dto.response.GetGymDetailsResponse;
+import clpetition.backend.gym.dto.response.GetTargetGymListResponse;
 import clpetition.backend.gym.repository.GymRepository;
+import clpetition.backend.member.domain.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +49,13 @@ public class GymService {
     }
 
     /**
+     * 암장명 리스트 조회
+     * */
+    public List<GetTargetGymListResponse> getTargetGymList(Member member, String gymName) {
+        return toGetTargetGymListResponseList(member, gymName);
+    }
+
+    /**
      * 암장 ID로 암장 가져오기
      * */
     private Gym getGymById(Long gymId) {
@@ -56,30 +67,14 @@ public class GymService {
      * 암장 관심 수 +1
      * */
     private void increaseFavorites(Gym gym) {
-        gymRepository.save(
-                Gym.builder()
-                        .id(gym.getId())
-                        .brand(gym.getBrand())
-                        .branch(gym.getBranch())
-                        .address(gym.getAddress())
-                        .favorites(gym.getFavorites() + 1)
-                        .build()
-        );
+        gymRepository.plusFavoritesCount(gym);
     }
 
     /**
      * 암장 관심 수 -1
      * */
     private void decreaseFavorites(Gym gym) {
-        gymRepository.save(
-                Gym.builder()
-                        .id(gym.getId())
-                        .brand(gym.getBrand())
-                        .branch(gym.getBranch())
-                        .address(gym.getAddress())
-                        .favorites(gym.getFavorites() - 1)
-                        .build()
-        );
+        gymRepository.minusFavoritesCount(gym);
     }
 
     /**
@@ -87,9 +82,15 @@ public class GymService {
      * */
     private GetGymDetailsResponse toGetGymDetailsResponse(Gym gym) {
         return GetGymDetailsResponse.builder()
-                .id(gym.getId())
-                .brand(gym.getBrand())
-                .branch(gym.getBranch())
+                .gymId(gym.getId())
+                .gymName(gym.getName())
                 .build();
+    }
+
+    /**
+     * 암장명 리스트 조회 to dto
+     * */
+    private List<GetTargetGymListResponse> toGetTargetGymListResponseList(Member member, String gymName) {
+        return gymRepository.findGymsByMemberAndGymName(member, gymName);
     }
 }

@@ -10,6 +10,7 @@ import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -17,7 +18,7 @@ import java.util.Arrays;
         info = @Info(
                 title = "Clpetition API Docs",
                 description = "클피티션 API 명세서",
-                version = "v0.1.6"
+                version = "v0.2.0"
         )
 )
 @Configuration

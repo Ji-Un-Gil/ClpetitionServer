@@ -4,14 +4,13 @@ import clpetition.backend.global.infra.file.FileService;
 import clpetition.backend.global.response.BaseException;
 import clpetition.backend.global.response.BaseResponseStatus;
 import clpetition.backend.gym.domain.Gym;
+import clpetition.backend.gym.service.FavoriteGymService;
 import clpetition.backend.gym.service.GymService;
 import clpetition.backend.gym.service.VisitsGymService;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.record.domain.Record;
 import clpetition.backend.record.dto.request.AddRecordRequest;
-import clpetition.backend.record.dto.response.GetRecordDetailsResponse;
-import clpetition.backend.record.dto.response.GetRecordIdResponse;
-import clpetition.backend.record.dto.response.GetRecordStatisticsPerMonthResponse;
+import clpetition.backend.record.dto.response.*;
 import clpetition.backend.record.repository.RecordRepository;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
@@ -24,7 +23,6 @@ import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +32,7 @@ public class RecordService {
 
     private final GymService gymService;
     private final VisitsGymService visitsGymService;
+    private final FavoriteGymService favoriteGymService;
     private final FileService fileService;
     private final RecordRepository recordRepository;
 
@@ -92,9 +91,19 @@ public class RecordService {
      * 기록 월별 상세 조회
      * */
     @Transactional(readOnly = true)
-    public Map<LocalDate, List<GetRecordDetailsResponse>> getRecordDetailsPerMonth(Member member, YearMonth yearMonth) {
+    public List<GetRecordDetailsResponse> getRecordDetailsPerMonth(Member member, YearMonth yearMonth) {
         List<Record> records = getRecordsPerMonth(member, yearMonth);
+        records.forEach(record -> Hibernate.initialize(record.getImages()));
         return toGetRecordDetailsPerMonthResponse(records);
+    }
+
+    /**
+     * 암장 정보 및 관련 암장 기록 가져오기
+     * */
+    @Transactional(readOnly = true)
+    public GetGymInfoAndRelatedRecordResponse getGymInfoAndRelatedRecord(Member member, Long gymId) {
+        Gym gym = gymService.getGym(gymId);
+        return toGetGymInfoAndRelatedRecordResponse(member, gym);
     }
 
     /**
@@ -121,7 +130,7 @@ public class RecordService {
      * */
     private GetRecordDetailsResponse toGetRecordDetailsResponse(Record record) {
         return GetRecordDetailsResponse.builder()
-                .id(record.getId())
+                .recordId(record.getId())
                 .gym(gymService.getGymDetails(record.getGym()))
                 .date(record.getDate())
                 .weekday(record.getDate().getDayOfWeek().getValue())
@@ -173,9 +182,36 @@ public class RecordService {
     /**
      * 기록 월별 상세 조회 to map dto
      * */
-    private Map<LocalDate, List<GetRecordDetailsResponse>> toGetRecordDetailsPerMonthResponse(List<Record> records) {
+    private List<GetRecordDetailsResponse> toGetRecordDetailsPerMonthResponse(List<Record> records) {
         return records.stream()
                 .map(this::toGetRecordDetailsResponse)
-                .collect(Collectors.groupingBy(GetRecordDetailsResponse::getDate));
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 관련 암장 기록 가져오기
+     * */
+    private List<GetRelatedRecordResponse> getRelatedRecord(Gym gym) {
+        return recordRepository.findRelatedRecord(gym);
+    }
+
+    /**
+     * 암장 관심 등록 여부 가져오기
+     * */
+    private boolean isFavoriteGym(Member member, Gym gym) {
+        return favoriteGymService.isFavoriteGym(member, gym);
+    }
+
+    /**
+     * 암장 정보 및 관련 암장 기록 가져오기 to dto
+     * */
+    private GetGymInfoAndRelatedRecordResponse toGetGymInfoAndRelatedRecordResponse(Member member, Gym gym) {
+        return GetGymInfoAndRelatedRecordResponse.builder()
+                .relatedRecord(getRelatedRecord(gym))
+                .gymName(gym.getName())
+                .region(gym.getRegion())
+                .favorites(gym.getFavorites())
+                .isFavorite(isFavoriteGym(member, gym))
+                .build();
     }
 }

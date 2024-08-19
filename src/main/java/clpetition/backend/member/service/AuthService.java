@@ -24,10 +24,10 @@ public class AuthService {
     private final FcmTokenService fcmTokenService;
     private final MemberRepository memberRepository;
     private StringBuilder stringBuilder;
-    private static final Integer RANDOM_NICKNAME_LENGTH = 1;
+    private static final Integer RANDOM_NICKNAME_LENGTH = 3;
 
     public SocialLoginResponse socialLogin(SocialLoginRequest socialLoginRequest) {
-        if (memberRepository.existsBySocialTypeAndSocialId(SocialType.valueOf(socialLoginRequest.socialType()), socialLoginRequest.socialId())) {
+        if (memberRepository.existsBySocialTypeAndSocialId(SocialType.valueOf(socialLoginRequest.getSocialType()), socialLoginRequest.getSocialId())) {
             Member member = isRegister(socialLoginRequest);
             String refreshToken = jwtService.createRefreshToken();
             jwtService.updateRefreshToken(member.getId(), refreshToken);
@@ -93,15 +93,15 @@ public class AuthService {
 
     // 분기 처리, 유저 정보 반환
     private Member isRegister(SocialLoginRequest socialLoginRequest) {
-        SocialType socialType = SocialType.valueOf(socialLoginRequest.socialType().toUpperCase());
-        Optional<Member> user = memberRepository.findBySocialTypeAndSocialId(socialType, socialLoginRequest.socialId());
+        SocialType socialType = SocialType.valueOf(socialLoginRequest.getSocialType().toUpperCase());
+        Optional<Member> user = memberRepository.findBySocialTypeAndSocialId(socialType, socialLoginRequest.getSocialId());
         // 재로그인
         if (user.isPresent()) {
             return user.get();
         }
         // 회원가입
-        Member newMember = createUser(socialLoginRequest.socialId(), socialType, socialLoginRequest.name(), socialLoginRequest.nickname(),
-                socialLoginRequest.email(), socialLoginRequest.phoneNumber(), socialLoginRequest.profileImage());
+        Member newMember = createUser(socialLoginRequest.getSocialId(), socialType, socialLoginRequest.getName(), socialLoginRequest.getNickname(),
+                socialLoginRequest.getEmail(), socialLoginRequest.getPhoneNumber(), socialLoginRequest.getProfileImage());
         memberRepository.save(newMember);
         return newMember;
     }
@@ -111,9 +111,9 @@ public class AuthService {
         EmojiParser.removeAllEmojis(nickname);
         nickname = nickname.replaceAll("[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]", "");
 
-        // 닉네임 8자리 이상 시, 7자리로 자르기
-        if (nickname.length() > 7) {
-            nickname = nickname.substring(0, 7);
+        // 닉네임 6자리 이상 시, 5자리로 자르기
+        if (nickname.length() > 5) {
+            nickname = nickname.substring(0, 5);
         }
 
         // 분기 처리, 닉네임 중복 또는 공백 시 뒤에 랜덤값 추가

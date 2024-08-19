@@ -1,7 +1,6 @@
 package clpetition.backend.member.config;
 
 import clpetition.backend.global.annotation.FindMemberArgumentResolver;
-import io.swagger.v3.oas.models.servers.Server;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;

@@ -53,7 +53,7 @@ public enum BaseResponseStatus implements BaseResponseStatusImpl {
     GYM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "GYM_001", "존재하지 않는 암장입니다."),
 
     // FavoriteGym
-    FAVORITE_GYM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "FAVORITE_GYM_001", "해당 암장은 즐겨찾기 등록이 되어있지 않습니다."),
+    FAVORITE_GYM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "FAVORITE_GYM_001", "해당 암장은 관심 등록이 되어있지 않습니다."),
 
     // Difficulty
     DIFFICULTY_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "DIFFICULTY_001", "존재하지 않는 난이도입니다."),

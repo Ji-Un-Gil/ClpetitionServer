@@ -6,5 +6,5 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public interface GetRecordIdResponseSchema {
 
     @Schema(description = "등반 기록 ID", example = "3")
-    Long getId();
+    Long getRecordId();
 }
