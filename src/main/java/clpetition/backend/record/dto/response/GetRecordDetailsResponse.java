@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Getter
 @Builder
 public class GetRecordDetailsResponse implements GetRecordDetailsResponseSchema {
-    private Long id;
+    private Long recordId;
 
     private GetGymDetailsResponse gym;
 
@@ -23,7 +23,7 @@ public class GetRecordDetailsResponse implements GetRecordDetailsResponseSchema 
 
     private Integer weekday;
 
-    private List<Map<String, Integer>> difficulties;
+    private Map<String, Integer> difficulties;
 
     private String memo;
 
@@ -35,9 +35,11 @@ public class GetRecordDetailsResponse implements GetRecordDetailsResponseSchema 
 
     private List<String> imageUrls;
 
-    public static List<Map<String, Integer>> convertDifficulties(List<Difficulties> difficulties) {
+    public static Map<String, Integer> convertDifficulties(List<Difficulties> difficulties) {
         return difficulties.stream()
-                .map(difficulty -> Map.of(difficulty.getDifficulty().getKey(), difficulty.getValue()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(
+                        difficulty -> difficulty.getDifficulty().getKey(),
+                        Difficulties::getValue
+                ));
     }
 }
