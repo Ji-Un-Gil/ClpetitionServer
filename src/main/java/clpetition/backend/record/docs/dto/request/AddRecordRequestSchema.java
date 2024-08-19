@@ -15,16 +15,12 @@ public interface AddRecordRequestSchema {
     Long getGymId();
 
     @Schema(description = "난이도 정보", example = """
-                                                [
-                                                    {
-                                                        "주황": 2
-                                                    },
-                                                    {
-                                                        "초록": 1
-                                                    }
-                                                ]
+                                                {
+                                                    "주황": 2,
+                                                    "초록": 1
+                                                }
                                                 """)
-    List<Map<String, Integer>> getDifficulties();
+    Map<String, Integer> getDifficulties();
 
     @Schema(description = "운동 시간", example = "01:30")
     String getExerciseTime();

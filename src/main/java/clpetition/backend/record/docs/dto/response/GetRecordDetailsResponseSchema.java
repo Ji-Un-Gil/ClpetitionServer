@@ -12,7 +12,7 @@ import java.util.Map;
 public interface GetRecordDetailsResponseSchema {
 
     @Schema(description = "등반 기록 ID", example = "3")
-    Long getId();
+    Long getRecordId();
 
     @Schema(description = "암장 정보")
     GetGymDetailsResponse getGym();
@@ -24,16 +24,12 @@ public interface GetRecordDetailsResponseSchema {
     Integer getWeekday();
 
     @Schema(description = "난이도 정보", example = """
-                                                [
-                                                    {
-                                                        "주황": 2
-                                                    },
-                                                    {
-                                                        "초록": 1
-                                                    }
-                                                ]
+                                                {
+                                                    "주황": 2,
+                                                    "초록": 1
+                                                }
                                                 """)
-    List<Map<String, Integer>> getDifficulties();
+    Map<String, Integer> getDifficulties();
 
     @Schema(description = "메모", example = "기록 저장 테스트")
     String getMemo();

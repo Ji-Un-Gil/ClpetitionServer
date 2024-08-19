@@ -13,9 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "Record API", description = "등반 기록 API")
 public interface GetRecordDetailsPerMonthApiDocs {
@@ -26,7 +24,7 @@ public interface GetRecordDetailsPerMonthApiDocs {
                     @ApiResponse(responseCode = "200", description = "🟢 정상"),
             }
     )
-    ResponseEntity<BaseResponse<Map<LocalDate, List<GetRecordDetailsResponse>>>> getRecordDetailsPerMonth(
+    ResponseEntity<BaseResponse<List<GetRecordDetailsResponse>>> getRecordDetailsPerMonth(
             @Parameter(hidden = true)
             @FindMember Member member,
 
