@@ -107,6 +107,22 @@ public class RecordService {
     }
 
     /**
+     * 메인 통계 가져오기
+     * */
+    @Transactional(readOnly = true)
+    public GetMainStatisticsResponse getMainStatistics(Member member, YearMonth yearMonth) {
+        return toGetMainStatisticsResponse(member, yearMonth);
+    }
+
+    /**
+     * 메인 이번달 등반 내역 가져오기
+     * */
+    @Transactional(readOnly = true)
+    public GetMainHistoryResponse getMainHistory(Member member, YearMonth yearMonth) {
+        return toGetMainHistoryResponse(member, yearMonth);
+    }
+
+    /**
      * 기록 추가 to entity
      * */
     private Record toRecord(Member member, AddRecordRequest addRecordRequest, Gym gym, List<String> imageUrlList) {
@@ -213,5 +229,19 @@ public class RecordService {
                 .favorites(gym.getFavorites())
                 .isFavorite(isFavoriteGym(member, gym))
                 .build();
+    }
+
+    /**
+     * 메인 통계 가져오기 to dto
+     * */
+    private GetMainStatisticsResponse toGetMainStatisticsResponse(Member member, YearMonth yearMonth) {
+        return recordRepository.findMainStatistics(member, yearMonth);
+    }
+
+    /**
+     * 메인 이번달 등반 내역 가져오기 to dto
+     * */
+    private GetMainHistoryResponse toGetMainHistoryResponse(Member member, YearMonth yearMonth) {
+        return recordRepository.findMainHistory(member, yearMonth);
     }
 }

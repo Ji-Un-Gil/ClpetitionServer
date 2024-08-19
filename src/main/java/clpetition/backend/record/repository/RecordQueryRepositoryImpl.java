@@ -3,6 +3,8 @@ package clpetition.backend.record.repository;
 import clpetition.backend.gym.domain.Gym;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.record.domain.Record;
+import clpetition.backend.record.dto.response.GetMainHistoryResponse;
+import clpetition.backend.record.dto.response.GetMainStatisticsResponse;
 import clpetition.backend.record.dto.response.GetRecordStatisticsPerMonthResponse;
 import clpetition.backend.record.dto.response.GetRelatedRecordResponse;
 import com.querydsl.core.Tuple;
@@ -11,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
@@ -69,6 +72,37 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
     }
 
     @Override
+    public GetMainStatisticsResponse findMainStatistics(Member member, YearMonth yearMonth) {
+        Tuple result = jpaQueryFactory
+                .select(
+                        record.countDistinct(),
+                        difficulties.value.sum()
+                )
+                .from(record)
+                .innerJoin(record.difficulties, difficulties)
+                .innerJoin(record.gym, gym)
+                .where(
+                        record.member.eq(member),
+                        record.date.year().eq(yearMonth.getYear()),
+                        record.date.month().eq(yearMonth.getMonthValue())
+                )
+                .fetchOne();
+
+        Integer totalSend = jpaQueryFactory
+                .select(difficulties.value.sum())
+                .from(record)
+                .leftJoin(record.difficulties, difficulties)
+                .where(record.member.eq(member))
+                .fetchOne();
+
+        return GetMainStatisticsResponse.builder()
+                .monthTotalRecord(Optional.ofNullable(result.get(record.countDistinct())).orElse(0L).intValue())
+                .monthTotalSend(Optional.ofNullable(result.get(difficulties.value.sum())).orElse(0))
+                .totalSend(Optional.ofNullable(totalSend).orElse(0))
+                .build();
+    }
+
+    @Override
     public List<Record> findRecordsPerMonth(Member member, YearMonth yearMonth) {
         return jpaQueryFactory
                 .selectFrom(record)
@@ -77,6 +111,7 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
                         record.date.year().eq(yearMonth.getYear()),
                         record.date.month().eq(yearMonth.getMonthValue())
                 )
+                .orderBy(record.date.asc())
                 .fetch();
     }
 
@@ -102,5 +137,25 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
                             .build();
                 })
                 .toList();
+    }
+
+    @Override
+    public GetMainHistoryResponse findMainHistory(Member member, YearMonth yearMonth) {
+        List<LocalDate> recordDates = jpaQueryFactory
+                .select(record.date)
+                .from(record)
+                .where(
+                        record.member.eq(member),
+                        record.date.year().eq(yearMonth.getYear()),
+                        record.date.month().eq(yearMonth.getMonthValue())
+                )
+                .distinct()
+                .orderBy(record.date.asc())
+                .fetch();
+
+        return GetMainHistoryResponse.builder()
+                .totalDay(recordDates.size())
+                .recordDates(recordDates)
+                .build();
     }
 }
