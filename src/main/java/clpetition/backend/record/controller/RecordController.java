@@ -7,10 +7,7 @@ import clpetition.backend.global.response.BaseResponseStatus;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.record.docs.*;
 import clpetition.backend.record.dto.request.AddRecordRequest;
-import clpetition.backend.record.dto.response.GetGymInfoAndRelatedRecordResponse;
-import clpetition.backend.record.dto.response.GetRecordDetailsResponse;
-import clpetition.backend.record.dto.response.GetRecordIdResponse;
-import clpetition.backend.record.dto.response.GetRecordStatisticsPerMonthResponse;
+import clpetition.backend.record.dto.response.*;
 import clpetition.backend.record.service.RecordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +35,8 @@ public class RecordController implements
         DeleteRecordApiDocs,
         GetRecordStatisticsPerMonthApiDocs,
         GetRecordDetailsPerMonthApiDocs,
-        GetGymInfoAndRelatedRecordApiDocs {
+        GetGymInfoAndRelatedRecordApiDocs,
+        GetRecordDetailsAllApiDocs {
 
     private final RecordService recordService;
 
@@ -106,5 +104,13 @@ public class RecordController implements
     ) {
         return BaseResponse.toResponseEntityContainsResult
                 (recordService.getGymInfoAndRelatedRecord(member, gymId));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<BaseResponse<List<GetRecordDetailsResponse>>> getRecordDetailsAll(
+            @FindMember Member member
+    ) {
+        return BaseResponse.toResponseEntityContainsResult
+                (recordService.getRecordDetailsAll(member));
     }
 }

@@ -1,11 +1,10 @@
-package clpetition.backend.record.docs;
+package clpetition.backend.member.docs;
 
 import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
+import clpetition.backend.member.docs.dto.request.UpdateProfileRequestSchema;
 import clpetition.backend.member.domain.Member;
-import clpetition.backend.record.docs.dto.request.AddRecordRequestSchema;
-import clpetition.backend.record.dto.request.AddRecordRequest;
-import clpetition.backend.record.dto.response.GetRecordIdResponse;
+import clpetition.backend.member.dto.request.UpdateProfileRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,55 +19,33 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.io.IOException;
 
-@Tag(name = "Record API", description = "등반 기록 API")
-public interface AddRecordApiDocs {
+@Tag(name = "Member API", description = "사용자 API")
+public interface UpdateProfileApiDocs {
 
-    @Operation(summary = "등반 기록 저장", description = "등반 기록을 저장합니다.")
+    @Operation(summary = "프로필 수정 API", description = "프로필을 수정합니다.")
     @ApiResponses(
             value = {
+                    @ApiResponse(responseCode = "200", description = "🟢 정상"),
                     @ApiResponse(
-                            responseCode = "201", description = "🟢 정상",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = BaseResponse.class),
-                                    examples = @ExampleObject(
-                                            value = """
-                                                    {
-                                                        "code": "CREATED",
-                                                        "message": "요청에 성공했으며 리소스가 정상적으로 생성되었습니다.",
-                                                        "result": {
-                                                            "recordId": 0,
-                                                            "imageUrls": [
-                                                                "url",
-                                                                "url2"
-                                                            ]
-                                                        }
-                                                    }
-                                                    """
-                                    )
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "404", description = "❌ DB에 등록되지 않은 암장 저장 시도",
+                            responseCode = "404", description = "❌ 프로필이 존재하지 않음",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = BaseResponse.class),
                                     examples = @ExampleObject(
                                             value = """
                                             {
-                                                "code": "GYM_001",
-                                                "message": "존재하지 않는 암장입니다.",
+                                                "code": "PROFILE_001",
+                                                "message": "존재하지 않는 프로필입니다.",
                                                 "result": null
                                             }
                                             """
                                     )
-
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "502", description = "❌ S3 사진 등록에서 문제 발생",
+                            responseCode = "502", description = "❌ S3 사진 등록 또는 삭제에서 문제 발생",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = BaseResponse.class),
@@ -85,7 +62,7 @@ public interface AddRecordApiDocs {
                     ),
             }
     )
-    ResponseEntity<BaseResponse<GetRecordIdResponse>> addRecord(
+    ResponseEntity<BaseResponse<Void>> updateProfile(
             @Parameter(hidden = true)
             @FindMember Member member,
 
@@ -93,10 +70,10 @@ public interface AddRecordApiDocs {
                     description = "DTO",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = AddRecordRequestSchema.class)
+                            schema = @Schema(implementation = UpdateProfileRequestSchema.class)
                     )
             )
-            @Valid @RequestPart("dto") AddRecordRequest addRecordRequest,
+            @Valid @RequestPart("dto") UpdateProfileRequest updateProfileRequest,
 
             @Parameter(
                     description = "첨부 사진",
@@ -104,6 +81,6 @@ public interface AddRecordApiDocs {
                             mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
                     )
             )
-            @RequestPart(value = "images", required = false) List<MultipartFile> multipartFileList
-    );
+            @RequestPart(value = "image", required = false) MultipartFile multipartFile
+    ) throws IOException;
 }

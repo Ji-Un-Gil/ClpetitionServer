@@ -6,10 +6,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetRecordIdResponse implements GetRecordIdResponseSchema {
     private Long recordId;
+    private List<String> imageUrls;
 }

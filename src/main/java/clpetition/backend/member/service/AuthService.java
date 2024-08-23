@@ -1,5 +1,6 @@
 package clpetition.backend.member.service;
 
+import clpetition.backend.member.domain.Profile;
 import clpetition.backend.member.dto.request.AddMemberAgreementRequest;
 import clpetition.backend.member.dto.request.SocialLoginRequest;
 import clpetition.backend.member.dto.response.SocialLoginResponse;
@@ -7,6 +8,7 @@ import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.domain.Role;
 import clpetition.backend.member.domain.SocialType;
 import clpetition.backend.member.repository.MemberRepository;
+import clpetition.backend.member.repository.ProfileRepository;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -23,8 +25,10 @@ public class AuthService {
     private final JwtService jwtService;
     private final FcmTokenService fcmTokenService;
     private final MemberRepository memberRepository;
+    private final ProfileRepository profileRepository;
     private StringBuilder stringBuilder;
     private static final Integer RANDOM_NICKNAME_LENGTH = 3;
+    private static final Integer RANDOM_INVITE_CODE_LENGTH = 5;
 
     public SocialLoginResponse socialLogin(SocialLoginRequest socialLoginRequest) {
         if (memberRepository.existsBySocialTypeAndSocialId(SocialType.valueOf(socialLoginRequest.getSocialType()), socialLoginRequest.getSocialId())) {
@@ -76,12 +80,6 @@ public class AuthService {
         memberRepository.save(member);
     }
 
-    public boolean checkNickname(Member member, String nickname) {
-        if (member.getRole().equals(Role.USER) && member.getNickname().equals(nickname))
-            return false;
-        return memberRepository.existsByNicknameAndRole(nickname, Role.USER).equals(true);
-    }
-
     public void logout(Member member) {
         jwtService.deleteRefreshToken(member.getId());
         // fcmTokenService.deleteFcmToken(member.getId());
@@ -102,7 +100,9 @@ public class AuthService {
         // 회원가입
         Member newMember = createUser(socialLoginRequest.getSocialId(), socialType, socialLoginRequest.getName(), socialLoginRequest.getNickname(),
                 socialLoginRequest.getEmail(), socialLoginRequest.getPhoneNumber(), socialLoginRequest.getProfileImage());
-        memberRepository.save(newMember);
+        Member member = memberRepository.save(newMember);
+        Profile newProfile = createProfile(member);
+        profileRepository.save(newProfile);
         return newMember;
     }
 
@@ -136,12 +136,23 @@ public class AuthService {
                 .build();
     }
 
+    private Profile createProfile(Member member) {
+        return Profile.builder()
+                .inviteCode(createTemporaryInviteCode())
+                .member(member)
+                .build();
+    }
+
     private String createTemporaryNickname(String nickname) {
         stringBuilder = new StringBuilder();
         return stringBuilder
                 .append(nickname)
                 .append(RandomStringUtils.randomAlphabetic(RANDOM_NICKNAME_LENGTH))
                 .toString();
+    }
+
+    private String createTemporaryInviteCode() {
+        return RandomStringUtils.randomAlphabetic(RANDOM_INVITE_CODE_LENGTH);
     }
 
     private boolean checkNickname(String nickname) {
