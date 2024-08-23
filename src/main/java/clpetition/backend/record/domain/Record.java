@@ -10,6 +10,7 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -28,8 +29,7 @@ public class Record extends BaseTimeEntity {
     // 요일은 필요할 때 로직에서 계산해 처리
     private LocalDate date;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "record_id")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "record")
     private List<Difficulties> difficulties;
 
     private String memo;
@@ -38,12 +38,27 @@ public class Record extends BaseTimeEntity {
 
     private Integer satisfaction;
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    private List<String> images;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "record")
+    private List<RecordImages> images;
 
     private Boolean isPrivate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    public static List<String> convertToImageUrls(List<RecordImages> recordImages) {
+        return recordImages.stream()
+                .map(RecordImages::getImageUrl)
+                .collect(Collectors.toList());
+    }
+
+    public static List<RecordImages> convertToRecordImages(List<String> imageUrls, Record record) {
+        return imageUrls.stream()
+                .map(url -> RecordImages.builder()
+                        .imageUrl(url)
+                        .record(record)
+                        .build())
+                .collect(Collectors.toList());
+    }
 }

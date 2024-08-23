@@ -2,12 +2,16 @@ package clpetition.backend.record.repository;
 
 import clpetition.backend.gym.domain.Gym;
 import clpetition.backend.member.domain.Member;
+import clpetition.backend.member.dto.response.GetRecordHistoryPageResponse;
+import clpetition.backend.member.dto.response.GetRecordHistoryResponse;
 import clpetition.backend.record.domain.Record;
+import clpetition.backend.record.domain.RecordImages;
 import clpetition.backend.record.dto.response.GetMainHistoryResponse;
 import clpetition.backend.record.dto.response.GetMainStatisticsResponse;
 import clpetition.backend.record.dto.response.GetRecordStatisticsPerMonthResponse;
 import clpetition.backend.record.dto.response.GetRelatedRecordResponse;
 import com.querydsl.core.Tuple;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,8 +20,11 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static clpetition.backend.gym.domain.QGym.gym;
 import static clpetition.backend.record.domain.QDifficulties.difficulties;
@@ -29,7 +36,8 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
-    private final Integer RELATED_RECORD_SIZE = 9;
+    private static final Integer RELATED_RECORD_SIZE = 9;
+    private static final Integer PAGE_SIZE = 10;
 
     @Override
     public GetRecordStatisticsPerMonthResponse findRecordStatisticsPerMonth(Member member, YearMonth yearMonth) {
@@ -129,7 +137,7 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
 
         return records.stream()
                 .map(record -> {
-                    List<String> images = record.getImages();
+                    List<String> images = Record.convertToImageUrls(record.getImages());
                     String thumbnail = images.get(0);
                     return GetRelatedRecordResponse.builder()
                             .recordId(record.getId())
@@ -157,5 +165,72 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
                 .totalDay(recordDates.size())
                 .recordDates(recordDates)
                 .build();
+    }
+
+    @Override
+    public GetRecordHistoryPageResponse findRecordHistory(Member member, Long lastRecordId) {
+        LocalDate lastRecordDate = jpaQueryFactory
+                .select(record.date)
+                .from(record)
+                .where(
+                        record.member.eq(member),
+                        lastRecordId != null ? record.id.eq(lastRecordId) : record.date.eq(
+                                        JPAExpressions
+                                                .select(record.date.max())
+                                                .from(record)
+                                                .where(record.member.eq(member))
+                        )
+                )
+                .fetchOne();
+
+        if (lastRecordDate == null)
+            return GetRecordHistoryPageResponse.builder()
+                    .hasNext(false)
+                    .recordHistory(new ArrayList<>())
+                    .build();
+
+        List<Record> results = jpaQueryFactory
+                .selectFrom(record)
+                .where(
+                        record.member.eq(member),
+                        lastRecordId != null ?
+                                (record.date.lt(lastRecordDate)
+                                        .or(record.date.eq(lastRecordDate).and(record.id.lt(lastRecordId)))) : null
+                )
+                .orderBy(record.date.desc(), record.id.desc())
+                .limit(PAGE_SIZE + 1)
+                .fetch();
+
+
+
+        boolean hasNext = results.size() > PAGE_SIZE;
+        if (hasNext)
+            results = results.subList(0, PAGE_SIZE);
+
+        return GetRecordHistoryPageResponse.builder()
+                .hasNext(hasNext)
+                .recordHistory(convertToResponse(results))
+                .build();
+    }
+
+    public List<GetRecordHistoryResponse> convertToResponse(List<Record> records) {
+        return records.stream()
+                .map(record -> {
+                    List<String> imageUrls = record.getImages().stream()
+                            .map(RecordImages::getImageUrl).toList();
+                    String thumbnail = !imageUrls.isEmpty() ? imageUrls.get(0) : "";
+
+                    Map<String, Integer> difficultiesMap = GetRecordHistoryResponse.convertDifficulties(record.getDifficulties());
+
+                    return GetRecordHistoryResponse.builder()
+                            .recordId(record.getId())
+                            .gymName(record.getGym().getName())
+                            .exerciseTime(record.getExerciseTime())
+                            .date(record.getDate())
+                            .difficulties(difficultiesMap)
+                            .thumbnail(thumbnail)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 }

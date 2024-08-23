@@ -8,9 +8,12 @@ import clpetition.backend.gym.service.FavoriteGymService;
 import clpetition.backend.gym.service.GymService;
 import clpetition.backend.gym.service.VisitsGymService;
 import clpetition.backend.member.domain.Member;
+import clpetition.backend.member.dto.response.GetRecordHistoryPageResponse;
 import clpetition.backend.record.domain.Record;
+import clpetition.backend.record.domain.RecordImages;
 import clpetition.backend.record.dto.request.AddRecordRequest;
 import clpetition.backend.record.dto.response.*;
+import clpetition.backend.record.repository.RecordImagesRepository;
 import clpetition.backend.record.repository.RecordRepository;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
@@ -35,6 +38,7 @@ public class RecordService {
     private final FavoriteGymService favoriteGymService;
     private final FileService fileService;
     private final RecordRepository recordRepository;
+    private final RecordImagesRepository recordImagesRepository;
 
     private final String DATE_PATTERN = "yyyy-M-d";
     private final String TIME_PATTERN = "HH:mm";
@@ -48,7 +52,7 @@ public class RecordService {
         Gym gym = gymService.getGym(addRecordRequest.getGymId());
         Record record = toRecord(member, addRecordRequest, gym, imageUrlList);
         visitsGymService.increaseVisitsGym(member, gym);
-        return new GetRecordIdResponse(record.getId());
+        return new GetRecordIdResponse(record.getId(), imageUrlList);
     }
 
     /**
@@ -74,7 +78,7 @@ public class RecordService {
      * */
     public void deleteRecord(Member member, Long recordId) {
         Record record = getRecordWithValidation(member, recordId);
-        fileService.deleteFiles(record.getImages());
+        fileService.deleteFiles(Record.convertToImageUrls(record.getImages()));
         visitsGymService.decreaseVisitsGym(member, record.getGym());
         deleteRecordById(record);
     }
@@ -94,7 +98,7 @@ public class RecordService {
     public List<GetRecordDetailsResponse> getRecordDetailsPerMonth(Member member, YearMonth yearMonth) {
         List<Record> records = getRecordsPerMonth(member, yearMonth);
         records.forEach(record -> Hibernate.initialize(record.getImages()));
-        return toGetRecordDetailsPerMonthResponse(records);
+        return toGetRecordDetailsListResponse(records);
     }
 
     /**
@@ -123,10 +127,34 @@ public class RecordService {
     }
 
     /**
+     * 사용자의 총 등반 기록 수 가져오기
+     * */
+    public Long getTotalRecord(Member member) {
+        return findTotalRecord(member);
+    }
+
+    /**
+     * 사용자의 등반기록 최신순으로 가져오기
+     * */
+    public GetRecordHistoryPageResponse getRecordHistory(Member member, Long lastRecordId) {
+        return findRecordHistory(member, lastRecordId);
+    }
+
+    /**
+     * 기록 전체 상세 조회
+     * */
+    @Transactional(readOnly = true)
+    public List<GetRecordDetailsResponse> getRecordDetailsAll(Member member) {
+        List<Record> records = getRecordsAll(member);
+        records.forEach(record -> Hibernate.initialize(record.getImages()));
+        return toGetRecordDetailsListResponse(records);
+    }
+
+    /**
      * 기록 추가 to entity
      * */
     private Record toRecord(Member member, AddRecordRequest addRecordRequest, Gym gym, List<String> imageUrlList) {
-        return recordRepository.save(
+        Record record = recordRepository.save(
                 Record.builder()
                         .gym(gym)
                         .date(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)))
@@ -134,11 +162,13 @@ public class RecordService {
                         .memo(addRecordRequest.getMemo())
                         .exerciseTime(LocalTime.parse(addRecordRequest.getExerciseTime(), DateTimeFormatter.ofPattern(TIME_PATTERN)))
                         .satisfaction(addRecordRequest.getSatisfaction())
-                        .images(imageUrlList)
                         .isPrivate(addRecordRequest.getIsPrivate())
                         .member(member)
                         .build()
         );
+        List<RecordImages> recordImages = Record.convertToRecordImages(imageUrlList, record);
+        recordImagesRepository.saveAll(recordImages);
+        return record;
     }
 
     /**
@@ -155,7 +185,7 @@ public class RecordService {
                 .exerciseTime(record.getExerciseTime())
                 .satisfaction(record.getSatisfaction())
                 .isPrivate(record.getIsPrivate())
-                .imageUrls(record.getImages())
+                .imageUrls(Record.convertToImageUrls(record.getImages()))
                 .build();
     }
 
@@ -196,9 +226,9 @@ public class RecordService {
     }
 
     /**
-     * 기록 월별 상세 조회 to map dto
+     * 기록 상세 조회(월별, 전체) to list dto
      * */
-    private List<GetRecordDetailsResponse> toGetRecordDetailsPerMonthResponse(List<Record> records) {
+    private List<GetRecordDetailsResponse> toGetRecordDetailsListResponse(List<Record> records) {
         return records.stream()
                 .map(this::toGetRecordDetailsResponse)
                 .collect(Collectors.toList());
@@ -243,5 +273,26 @@ public class RecordService {
      * */
     private GetMainHistoryResponse toGetMainHistoryResponse(Member member, YearMonth yearMonth) {
         return recordRepository.findMainHistory(member, yearMonth);
+    }
+
+    /**
+     * (R) 사용자의 총 등반 기록 수 가져오기
+     * */
+    private Long findTotalRecord(Member member){
+        return recordRepository.countByMember(member);
+    }
+
+    /**
+     * (R) 사용자의 등반기록 최신순으로 가져오기
+     * */
+    private GetRecordHistoryPageResponse findRecordHistory(Member member, Long lastRecordId) {
+        return recordRepository.findRecordHistory(member, lastRecordId);
+    }
+
+    /**
+     * (R) 전체 상세 기록 가져오기
+     * */
+    private List<Record> getRecordsAll(Member member) {
+        return recordRepository.findByMemberOrderByDateDesc(member);
     }
 }

@@ -35,7 +35,8 @@ public class RecordController implements
         DeleteRecordApiDocs,
         GetRecordStatisticsPerMonthApiDocs,
         GetRecordDetailsPerMonthApiDocs,
-        GetGymInfoAndRelatedRecordApiDocs {
+        GetGymInfoAndRelatedRecordApiDocs,
+        GetRecordDetailsAllApiDocs {
 
     private final RecordService recordService;
 
@@ -103,5 +104,13 @@ public class RecordController implements
     ) {
         return BaseResponse.toResponseEntityContainsResult
                 (recordService.getGymInfoAndRelatedRecord(member, gymId));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<BaseResponse<List<GetRecordDetailsResponse>>> getRecordDetailsAll(
+            @FindMember Member member
+    ) {
+        return BaseResponse.toResponseEntityContainsResult
+                (recordService.getRecordDetailsAll(member));
     }
 }
