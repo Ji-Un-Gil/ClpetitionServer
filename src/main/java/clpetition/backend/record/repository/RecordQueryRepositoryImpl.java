@@ -233,28 +233,4 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
                 })
                 .collect(Collectors.toList());
     }
-
-    @Override
-    public List<GetRelatedRecordResponse> findRelatedRecord(Gym gym) {
-        List<Record> records = jpaQueryFactory
-                .selectFrom(record)
-                .where(
-                        record.gym.eq(gym),
-                        record.images.isNotEmpty()
-                )
-                .orderBy(record.date.desc())
-                .limit(RELATED_RECORD_SIZE)
-                .fetch();
-
-        return records.stream()
-                .map(record -> {
-                    List<String> images = record.getImages();
-                    String thumbnail = images.get(0);
-                    return GetRelatedRecordResponse.builder()
-                            .recordId(record.getId())
-                            .thumbnail(thumbnail)
-                            .build();
-                })
-                .toList();
-    }
 }
