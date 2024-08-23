@@ -1,6 +1,6 @@
 package clpetition.backend.record.domain;
 
-import clpetition.backend.gym.domain.Difficulty;
+import clpetition.backend.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,22 +9,15 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Difficulties {
+public class RecordImages extends BaseTimeEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Enumerated(EnumType.STRING)
-    private Difficulty difficulty;
-
-    private Integer value;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "record_id")
     private Record record;
 
-    public Difficulties(Difficulty difficulty, Integer value) {
-        this.difficulty = difficulty;
-        this.value = value;
-    }
+    private String imageUrl;
 }

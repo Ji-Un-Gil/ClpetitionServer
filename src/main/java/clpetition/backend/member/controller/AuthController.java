@@ -1,20 +1,19 @@
 package clpetition.backend.member.controller;
 
 import clpetition.backend.global.annotation.FindMember;
-import clpetition.backend.global.response.BaseException;
 import clpetition.backend.global.response.BaseResponse;
 import clpetition.backend.global.response.BaseResponseStatus;
 import clpetition.backend.member.docs.AddMemberAgreementApiDocs;
+import clpetition.backend.member.docs.LogoutApiDocs;
 import clpetition.backend.member.docs.SocialLoginApiDocs;
+import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.dto.request.AddMemberAgreementRequest;
 import clpetition.backend.member.dto.request.SocialLoginRequest;
 import clpetition.backend.member.dto.response.SocialLoginResponse;
-import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.service.AuthService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +24,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController implements
         SocialLoginApiDocs,
-        AddMemberAgreementApiDocs {
+        AddMemberAgreementApiDocs,
+        LogoutApiDocs {
 
     private final AuthService authService;
 
@@ -45,19 +45,6 @@ public class AuthController implements
             @Valid @RequestBody AddMemberAgreementRequest addMemberAgreementRequest
     ) {
         authService.addMemberAgreement(member, addMemberAgreementRequest);
-        return BaseResponse.toResponseEntityContainsStatus(BaseResponseStatus.SUCCESS);
-    }
-
-    @GetMapping("/duplicated")
-    public ResponseEntity<BaseResponse<Void>> checkNickname(
-            @FindMember Member member,
-            @RequestParam("nickname")
-            @NotBlank(message = "닉네임을 입력해주세요")
-            @Length(max = 10, message = "닉네임은 10글자 이하로 작성해주세요")
-            String nickname
-    ) {
-        if (authService.checkNickname(member, nickname))
-            throw new BaseException(BaseResponseStatus.DUPLICATED_NICKNAME);
         return BaseResponse.toResponseEntityContainsStatus(BaseResponseStatus.SUCCESS);
     }
 

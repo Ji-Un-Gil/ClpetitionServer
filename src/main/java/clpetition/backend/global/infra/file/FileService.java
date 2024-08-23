@@ -56,16 +56,22 @@ public class FileService {
     }
 
     /**
+     * S3 Delete File
+     * */
+    public void deleteFile(String imageUrl) {
+        try {
+            amazonS3Client.deleteObject(bucket, imageUrl.split("/")[3] + "/" + imageUrl.split("/")[4]);
+        } catch (Exception e) {
+            throw new BaseException(BaseResponseStatus.FILE_SERVER_ERROR);
+        }
+    }
+
+    /**
      * S3 Delete Many Files
      * */
     public void deleteFiles(List<String> imageUrlList) {
-        for (String imageUrl: imageUrlList) {
-            try {
-                amazonS3Client.deleteObject(bucket, imageUrl.split("/")[3] + "/" + imageUrl.split("/")[4]);
-            } catch (Exception e) {
-                throw new BaseException(BaseResponseStatus.FILE_SERVER_ERROR);
-            }
-        }
+        for (String imageUrl: imageUrlList)
+            deleteFile(imageUrl);
     }
 
     private String upload(File uploadFile, String dirName) {
