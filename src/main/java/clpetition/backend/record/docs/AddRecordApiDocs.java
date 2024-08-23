@@ -35,14 +35,18 @@ public interface AddRecordApiDocs {
                                     schema = @Schema(implementation = BaseResponse.class),
                                     examples = @ExampleObject(
                                             value = """
-                                            {
-                                                "code": "CREATED",
-                                                "message": "요청에 성공했으며 리소스가 정상적으로 생성되었습니다.",
-                                                "result": {
-                                                    "recordId": 0
-                                                }
-                                            }
-                                            """
+                                                    {
+                                                        "code": "CREATED",
+                                                        "message": "요청에 성공했으며 리소스가 정상적으로 생성되었습니다.",
+                                                        "result": {
+                                                            "recordId": 0,
+                                                            "imageUrls": [
+                                                                "url",
+                                                                "url2"
+                                                            ]
+                                                        }
+                                                    }
+                                                    """
                                     )
                             )
                     ),
