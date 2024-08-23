@@ -151,6 +151,15 @@ public class RecordService {
     }
 
     /**
+     * 암장 정보 및 관련 암장 기록 가져오기
+     * */
+    @Transactional(readOnly = true)
+    public GetGymInfoAndRelatedRecordResponse getGymInfoAndRelatedRecord(Member member, Long gymId) {
+        Gym gym = gymService.getGym(gymId);
+        return toGetGymInfoAndRelatedRecordResponse(member, gym);
+    }
+
+    /**
      * 기록 추가 to entity
      * */
     private Record toRecord(Member member, AddRecordRequest addRecordRequest, Gym gym, List<String> imageUrlList) {
