@@ -70,6 +70,9 @@ public class AuthService {
         return SocialLoginResponse.builder()
                 .id(member.getId())
                 .nickname(member.getNickname())
+                .role(member.getRole().getDescription())
+                .socialId(member.getSocialId())
+                .socialType(member.getSocialType().name())
                 .accessToken(jwtService.createAccessToken(member.getSocialId()))
                 .refreshToken(refreshToken)
                 .build();

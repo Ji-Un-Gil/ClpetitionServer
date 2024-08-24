@@ -43,10 +43,4 @@ public class AddRecordRequest implements AddRecordRequestSchema {
 
     @Builder.Default
     Boolean isPrivate = false;
-
-    public List<Difficulties> convertDifficulties() {
-        return difficulties.entrySet().stream()
-                .map(entry -> new Difficulties(Difficulty.findByKey(entry.getKey()), entry.getValue()))
-                .collect(Collectors.toList());
-    }
 }

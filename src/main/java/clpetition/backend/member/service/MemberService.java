@@ -138,7 +138,7 @@ public class MemberService {
         if (multipartFile == null || multipartFile.isEmpty())
             return null;
         // 기존 프로필 이미지 S3 삭제
-        if (member.getProfileImage() != null && !member.getProfileImage().isEmpty())
+        if (member.getProfileImage() != null && !member.getProfileImage().isEmpty() && fileService.isValidFile(member.getProfileImage()))
             fileService.deleteFile(member.getProfileImage());
         return fileService.upload(multipartFile, IMAGE_DIR);
     }
