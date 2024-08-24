@@ -8,25 +8,25 @@ public interface SocialLoginResponseSchema {
     @Schema(description = "사용자 ID", example = "1")
     Long id();
 
-    @Schema(description = "이메일", example = "cheolsu@gmail.com")
+    @Schema(description = "이메일", example = "cheolsu@gmail.com", nullable = true)
     String email();
 
-    @Schema(description = "이름", example = "김철수")
+    @Schema(description = "이름", example = "김철수", nullable = true)
     String name();
 
     @Schema(description = "닉네임", example = "클린이")
     String nickname();
 
-    @Schema(description = "휴대전화 번호", example = "010-0101-0101")
+    @Schema(description = "휴대전화 번호", example = "010-0101-0101", nullable = true)
     String phoneNumber();
 
-    @Schema(description = "프로필 이미지", example = "testprofileimage.png")
+    @Schema(description = "프로필 이미지", example = "testprofileimage.png", nullable = true)
     String profileImage();
 
-    @Schema(description = "마케팅 수신 동의 여부", example = "false")
+    @Schema(description = "마케팅 수신 동의 여부", example = "false", nullable = true)
     Boolean marketingAgree();
 
-    @Schema(description = "사용자 역할", example = "USER")
+    @Schema(description = "사용자 역할", example = "일반 사용자")
     String role();
 
     @Schema(description = "소셜 타입", example = "GOOGLE")
