@@ -4,6 +4,10 @@ import clpetition.backend.gym.domain.Difficulty;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Entity
 @Getter
 @Builder
@@ -23,8 +27,21 @@ public class Difficulties {
     @JoinColumn(name = "record_id")
     private Record record;
 
-    public Difficulties(Difficulty difficulty, Integer value) {
-        this.difficulty = difficulty;
-        this.value = value;
+    public static Map<String, Integer> convertToDifficultiesMap(List<Difficulties> difficulties) {
+        return difficulties.stream()
+                .collect(Collectors.toMap(
+                        difficulty -> difficulty.getDifficulty().getKey(),
+                        Difficulties::getValue
+                ));
+    }
+
+    public static List<Difficulties> convertToDifficulties(Map<String, Integer> difficulties, Record record) {
+        return difficulties.entrySet().stream()
+                .map(entry -> Difficulties.builder()
+                        .difficulty(Difficulty.findByKey(entry.getKey()))
+                        .value(entry.getValue())
+                        .record(record)
+                        .build())
+                .collect(Collectors.toList());
     }
 }

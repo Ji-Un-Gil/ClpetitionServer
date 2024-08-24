@@ -20,7 +20,7 @@ public interface GetRecordDetailsResponseSchema {
     @Schema(description = "기록 날짜", example = "2024-08-09")
     LocalDate getDate();
 
-    @Schema(description = "기록 요일", example = "2024-08-09")
+    @Schema(description = "기록 요일", example = "5")
     Integer getWeekday();
 
     @Schema(description = "난이도 정보", example = """
@@ -31,7 +31,7 @@ public interface GetRecordDetailsResponseSchema {
                                                 """)
     Map<String, Integer> getDifficulties();
 
-    @Schema(description = "메모", example = "기록 저장 테스트")
+    @Schema(description = "메모", example = "기록 저장 테스트", nullable = true)
     String getMemo();
 
     @Schema(description = "운동 시간", example = "01:30")

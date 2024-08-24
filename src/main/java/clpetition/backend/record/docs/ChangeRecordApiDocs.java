@@ -3,7 +3,6 @@ package clpetition.backend.record.docs;
 import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
 import clpetition.backend.member.domain.Member;
-import clpetition.backend.record.docs.dto.request.AddRecordRequestSchema;
 import clpetition.backend.record.dto.request.AddRecordRequest;
 import clpetition.backend.record.dto.response.GetRecordIdResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,10 +17,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Record API", description = "등반 기록 API")
 public interface ChangeRecordApiDocs {
@@ -85,22 +81,6 @@ public interface ChangeRecordApiDocs {
                                     }
                             )
                     ),
-                    @ApiResponse(
-                            responseCode = "502", description = "❌ S3 사진 등록 또는 삭제에서 문제 발생",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = BaseResponse.class),
-                                    examples = @ExampleObject(
-                                            value = """
-                                            {
-                                                "code": "FILE_002",
-                                                "message": "파일 서버의 문제로 작업에 실패했습니다.",
-                                                "result": null
-                                            }
-                                            """
-                                    )
-                            )
-                    ),
             }
     )
     ResponseEntity<BaseResponse<GetRecordIdResponse>> changeRecord(
@@ -110,21 +90,6 @@ public interface ChangeRecordApiDocs {
             @Parameter(description = "등반 기록 ID", example = "2")
             @PathVariable("recordId") Long recordId,
 
-            @Parameter(
-                    description = "DTO",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = AddRecordRequestSchema.class)
-                    )
-            )
-            @Valid @RequestPart("dto") AddRecordRequest addRecordRequest,
-
-            @Parameter(
-                    description = "첨부 사진",
-                    content = @Content(
-                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
-                    )
-            )
-            @RequestPart(value = "images", required = false) List<MultipartFile> multipartFileList
+            @Valid @RequestBody AddRecordRequest addRecordRequest
     );
 }

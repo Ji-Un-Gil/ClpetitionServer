@@ -3,6 +3,7 @@ package clpetition.backend.global.infra.file;
 import clpetition.backend.global.response.BaseException;
 import clpetition.backend.global.response.BaseResponseStatus;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +73,23 @@ public class FileService {
     public void deleteFiles(List<String> imageUrlList) {
         for (String imageUrl: imageUrlList)
             deleteFile(imageUrl);
+    }
+
+    /**
+     * S3 Exists File
+     * */
+    public boolean isValidFile(String imageUrl) {
+        boolean isValidFile = true;
+        try {
+            amazonS3Client.getObjectMetadata(bucket, imageUrl.split("/")[3] + "/" + imageUrl.split("/")[4]);
+        } catch (AmazonS3Exception s3e) {
+            if (s3e.getStatusCode() == 404)
+                isValidFile = false;
+            else
+                throw new BaseException(BaseResponseStatus.FILE_SERVER_ERROR);
+        }
+
+        return isValidFile;
     }
 
     private String upload(File uploadFile, String dirName) {
