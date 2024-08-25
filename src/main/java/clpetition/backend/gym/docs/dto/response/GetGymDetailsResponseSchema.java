@@ -10,4 +10,7 @@ public interface GetGymDetailsResponseSchema {
 
     @Schema(description = "암장명", example = "더클라임 연남점")
     String gymName();
+
+    @Schema(description = "암장 약어 (5글자 초과 시 ..으로 표기)", example = "더클 연남", nullable = true)
+    String shortName();
 }

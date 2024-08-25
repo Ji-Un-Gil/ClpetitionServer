@@ -34,12 +34,4 @@ public class GetRecordDetailsResponse implements GetRecordDetailsResponseSchema 
     private Boolean isPrivate;
 
     private List<String> imageUrls;
-
-    public static Map<String, Integer> convertDifficulties(List<Difficulties> difficulties) {
-        return difficulties.stream()
-                .collect(Collectors.toMap(
-                        difficulty -> difficulty.getDifficulty().getKey(),
-                        Difficulties::getValue
-                ));
-    }
 }

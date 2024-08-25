@@ -9,10 +9,12 @@ import clpetition.backend.gym.service.GymService;
 import clpetition.backend.gym.service.VisitsGymService;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.dto.response.GetRecordHistoryPageResponse;
+import clpetition.backend.record.domain.Difficulties;
 import clpetition.backend.record.domain.Record;
 import clpetition.backend.record.domain.RecordImages;
 import clpetition.backend.record.dto.request.AddRecordRequest;
 import clpetition.backend.record.dto.response.*;
+import clpetition.backend.record.repository.DifficultiesRepository;
 import clpetition.backend.record.repository.RecordImagesRepository;
 import clpetition.backend.record.repository.RecordRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,7 @@ public class RecordService {
     private final FileService fileService;
     private final RecordRepository recordRepository;
     private final RecordImagesRepository recordImagesRepository;
+    private final DifficultiesRepository difficultiesRepository;
 
     private final String DATE_PATTERN = "yyyy-M-d";
     private final String TIME_PATTERN = "HH:mm";
@@ -62,15 +65,24 @@ public class RecordService {
     public GetRecordDetailsResponse getRecordDetails(Member member, Long recordId) {
         Record record = getRecordWithValidation(member, recordId);
         Hibernate.initialize(record.getImages());
-        return toGetRecordDetailsResponse(record);
+        return toGetRecordDetailsResponse(record, null);
     }
 
     /**
      * 기록 수정(삭제 후 저장)
      * */
-    public GetRecordIdResponse changeRecord(Member member, Long recordId, AddRecordRequest addRecordRequest, List<MultipartFile> multipartFileList) {
-        deleteRecord(member, recordId);
-        return addRecord(member, addRecordRequest, multipartFileList);
+    public GetRecordIdResponse changeRecord(Member member, Long recordId, AddRecordRequest addRecordRequest) {
+        Record record = getRecordWithValidation(member, recordId);
+        Hibernate.initialize(record.getImages());
+        List<String> imageUrlList = Record.convertToImageUrls(record.getImages());
+
+        visitsGymService.decreaseVisitsGym(member, record.getGym());
+        deleteRecordById(record);
+
+        Gym gym = gymService.getGym(addRecordRequest.getGymId());
+        Record newRecord = toRecord(member, addRecordRequest, gym, imageUrlList);
+        visitsGymService.increaseVisitsGym(member, gym);
+        return new GetRecordIdResponse(newRecord.getId(), imageUrlList);
     }
 
     /**
@@ -158,7 +170,6 @@ public class RecordService {
                 Record.builder()
                         .gym(gym)
                         .date(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)))
-                        .difficulties(addRecordRequest.convertDifficulties())
                         .memo(addRecordRequest.getMemo())
                         .exerciseTime(LocalTime.parse(addRecordRequest.getExerciseTime(), DateTimeFormatter.ofPattern(TIME_PATTERN)))
                         .satisfaction(addRecordRequest.getSatisfaction())
@@ -166,7 +177,9 @@ public class RecordService {
                         .member(member)
                         .build()
         );
+        List<Difficulties> difficulties = Difficulties.convertToDifficulties(addRecordRequest.getDifficulties(), record);
         List<RecordImages> recordImages = Record.convertToRecordImages(imageUrlList, record);
+        difficultiesRepository.saveAll(difficulties);
         recordImagesRepository.saveAll(recordImages);
         return record;
     }
@@ -174,13 +187,13 @@ public class RecordService {
     /**
      * 기록 상세조회 to dto
      * */
-    private GetRecordDetailsResponse toGetRecordDetailsResponse(Record record) {
+    private GetRecordDetailsResponse toGetRecordDetailsResponse(Record record, String shortName) {
         return GetRecordDetailsResponse.builder()
                 .recordId(record.getId())
-                .gym(gymService.getGymDetails(record.getGym()))
+                .gym(gymService.getGymDetails(record.getGym(), shortName))
                 .date(record.getDate())
                 .weekday(record.getDate().getDayOfWeek().getValue())
-                .difficulties(GetRecordDetailsResponse.convertDifficulties(record.getDifficulties()))
+                .difficulties(Difficulties.convertToDifficultiesMap(record.getDifficulties()))
                 .memo(record.getMemo())
                 .exerciseTime(record.getExerciseTime())
                 .satisfaction(record.getSatisfaction())
@@ -230,7 +243,7 @@ public class RecordService {
      * */
     private List<GetRecordDetailsResponse> toGetRecordDetailsListResponse(List<Record> records) {
         return records.stream()
-                .map(this::toGetRecordDetailsResponse)
+                .map(record -> toGetRecordDetailsResponse(record, record.getGym().getShortName()))
                 .collect(Collectors.toList());
     }
 

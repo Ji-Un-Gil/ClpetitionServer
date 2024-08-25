@@ -59,15 +59,14 @@ public class RecordController implements
                 (recordService.getRecordDetails(member, recordId));
     }
 
-    @PutMapping(value = "/{recordId}", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{recordId}")
     public ResponseEntity<BaseResponse<GetRecordIdResponse>> changeRecord(
             @FindMember Member member,
             @PathVariable("recordId") Long recordId,
-            @Valid @RequestPart("dto") AddRecordRequest addRecordRequest,
-            @RequestPart(value = "images", required = false) List<MultipartFile> multipartFileList
+            @Valid @RequestBody AddRecordRequest addRecordRequest
     ) {
         return BaseResponse.toResponseEntityContainsStatusAndResult
-                (BaseResponseStatus.CREATED, recordService.changeRecord(member, recordId, addRecordRequest, multipartFileList));
+                (BaseResponseStatus.CREATED, recordService.changeRecord(member, recordId, addRecordRequest));
     }
 
     @DeleteMapping("/{recordId}")
