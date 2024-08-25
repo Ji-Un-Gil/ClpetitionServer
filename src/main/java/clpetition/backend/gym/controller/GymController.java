@@ -30,7 +30,7 @@ public class GymController implements
     @GetMapping("")
     public ResponseEntity<BaseResponse<List<GetTargetGymListResponse>>> getTargetGymList(
             @FindMember Member member,
-            @RequestParam("gymName") String gymName
+            @RequestParam(value = "gymName", required = false, defaultValue = "") String gymName
     ) {
         return BaseResponse.toResponseEntityContainsResult
                 (gymService.getTargetGymList(member, gymName));
