@@ -29,6 +29,6 @@ public interface GetTargetGymListApiDocs {
             @FindMember Member member,
 
             @Parameter(description = "암장명 검색어", example = "더클라임", in = ParameterIn.QUERY)
-            @RequestParam("gymName") String gymName
+            @RequestParam(value = "gymName", required = false, defaultValue = "") String gymName
     );
 }
