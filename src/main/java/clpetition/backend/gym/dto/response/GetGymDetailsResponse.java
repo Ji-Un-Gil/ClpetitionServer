@@ -7,6 +7,6 @@ import lombok.Builder;
 public record GetGymDetailsResponse(
         Long gymId,
         String gymName,
-        String initial
+        String shortName
 ) implements GetGymDetailsResponseSchema {
 }

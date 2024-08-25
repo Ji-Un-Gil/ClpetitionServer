@@ -44,8 +44,8 @@ public class GymService {
     /**
      * 암장 상세조회
      * */
-    public GetGymDetailsResponse getGymDetails(Gym gym, String initial) {
-        return toGetGymDetailsResponse(gym, initial);
+    public GetGymDetailsResponse getGymDetails(Gym gym, String shortName) {
+        return toGetGymDetailsResponse(gym, shortName);
     }
     
     /**
@@ -80,11 +80,11 @@ public class GymService {
     /**
      * 암장 상세조회 to dto
      * */
-    private GetGymDetailsResponse toGetGymDetailsResponse(Gym gym, String initial) {
+    private GetGymDetailsResponse toGetGymDetailsResponse(Gym gym, String shortName) {
         return GetGymDetailsResponse.builder()
                 .gymId(gym.getId())
                 .gymName(gym.getName())
-                .initial(initial)
+                .shortName(shortName != null ? (shortName.length() > 5 ? shortName.substring(0,4) + "…" : shortName) : null)
                 .build();
     }
 

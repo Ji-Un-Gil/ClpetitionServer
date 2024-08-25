@@ -23,7 +23,7 @@ public class Gym extends BaseTimeEntity {
 
     private String address;
 
-    private String initial;
+    private String shortName;
 
     private Long favorites;
 }
