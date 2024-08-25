@@ -16,4 +16,7 @@ public interface GetTargetGymListResponseSchema {
 
     @Schema(description = "암장 방문 여부", example = "true")
     Boolean isVisited();
+
+    @Schema(description = "암장 약어 (5글자 초과 시 ..으로 표기)", example = "더클 연남")
+    String shortName();
 }
