@@ -44,10 +44,10 @@ public class GymService {
     /**
      * 암장 상세조회
      * */
-    public GetGymDetailsResponse getGymDetails(Gym gym) {
-        return toGetGymDetailsResponse(gym);
+    public GetGymDetailsResponse getGymDetails(Gym gym, String initial) {
+        return toGetGymDetailsResponse(gym, initial);
     }
-
+    
     /**
      * 암장명 리스트 조회
      * */
@@ -80,10 +80,11 @@ public class GymService {
     /**
      * 암장 상세조회 to dto
      * */
-    private GetGymDetailsResponse toGetGymDetailsResponse(Gym gym) {
+    private GetGymDetailsResponse toGetGymDetailsResponse(Gym gym, String initial) {
         return GetGymDetailsResponse.builder()
                 .gymId(gym.getId())
                 .gymName(gym.getName())
+                .initial(initial)
                 .build();
     }
 
