@@ -8,6 +8,7 @@ public record GetTargetGymListResponse(
         Long gymId,
         String gymName,
         String address,
-        Boolean isVisited
+        Boolean isVisited,
+        String shortName
 ) implements GetTargetGymListResponseSchema {
 }

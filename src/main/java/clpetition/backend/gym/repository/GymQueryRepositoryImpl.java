@@ -28,6 +28,7 @@ public class GymQueryRepositoryImpl implements GymQueryRepository {
                         gym.id.as("gymId"),
                         gym.name.as("gymName"),
                         gym.address.as("address"),
+                        gym.shortName.as("shortName"),
                         record.isNotNull().as("isVisited")
                 ))
                 .from(gym)
