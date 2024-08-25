@@ -65,7 +65,7 @@ public class RecordService {
     public GetRecordDetailsResponse getRecordDetails(Member member, Long recordId) {
         Record record = getRecordWithValidation(member, recordId);
         Hibernate.initialize(record.getImages());
-        return toGetRecordDetailsResponse(record);
+        return toGetRecordDetailsResponse(record, null);
     }
 
     /**
@@ -187,10 +187,10 @@ public class RecordService {
     /**
      * 기록 상세조회 to dto
      * */
-    private GetRecordDetailsResponse toGetRecordDetailsResponse(Record record) {
+    private GetRecordDetailsResponse toGetRecordDetailsResponse(Record record, String initial) {
         return GetRecordDetailsResponse.builder()
                 .recordId(record.getId())
-                .gym(gymService.getGymDetails(record.getGym()))
+                .gym(gymService.getGymDetails(record.getGym(), initial))
                 .date(record.getDate())
                 .weekday(record.getDate().getDayOfWeek().getValue())
                 .difficulties(Difficulties.convertToDifficultiesMap(record.getDifficulties()))
@@ -243,7 +243,7 @@ public class RecordService {
      * */
     private List<GetRecordDetailsResponse> toGetRecordDetailsListResponse(List<Record> records) {
         return records.stream()
-                .map(this::toGetRecordDetailsResponse)
+                .map(record -> toGetRecordDetailsResponse(record, record.getGym().getInitial()))
                 .collect(Collectors.toList());
     }
 
