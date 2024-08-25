@@ -33,4 +33,7 @@ public interface GetProfileResponseSchema {
 
     @Schema(description = "클라이밍 시작일", example = "2024-07-01", nullable = true)
     LocalDate startDate();
+
+    @Schema(description = "인스타그램 주소", example = "https://www.instagram.com/example/", nullable = true)
+    String instagram();
 }

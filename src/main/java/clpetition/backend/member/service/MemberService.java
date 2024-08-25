@@ -103,6 +103,7 @@ public class MemberService {
                 .reach(profile.getReach())
                 .totalRecord(totalRecord)
                 .startDate(profile.getStartDate())
+                .instagram(profile.getInstagram())
                 .build();
     }
 
