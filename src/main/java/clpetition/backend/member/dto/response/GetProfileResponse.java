@@ -15,6 +15,7 @@ public record GetProfileResponse(
         Integer height,
         Integer reach,
         Long totalRecord,
-        LocalDate startDate
+        LocalDate startDate,
+        String instagram
 ) implements GetProfileResponseSchema {
 }
