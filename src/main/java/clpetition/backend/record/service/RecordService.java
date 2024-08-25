@@ -187,10 +187,10 @@ public class RecordService {
     /**
      * 기록 상세조회 to dto
      * */
-    private GetRecordDetailsResponse toGetRecordDetailsResponse(Record record, String initial) {
+    private GetRecordDetailsResponse toGetRecordDetailsResponse(Record record, String shortName) {
         return GetRecordDetailsResponse.builder()
                 .recordId(record.getId())
-                .gym(gymService.getGymDetails(record.getGym(), initial))
+                .gym(gymService.getGymDetails(record.getGym(), shortName))
                 .date(record.getDate())
                 .weekday(record.getDate().getDayOfWeek().getValue())
                 .difficulties(Difficulties.convertToDifficultiesMap(record.getDifficulties()))
@@ -243,7 +243,7 @@ public class RecordService {
      * */
     private List<GetRecordDetailsResponse> toGetRecordDetailsListResponse(List<Record> records) {
         return records.stream()
-                .map(record -> toGetRecordDetailsResponse(record, record.getGym().getInitial()))
+                .map(record -> toGetRecordDetailsResponse(record, record.getGym().getShortName()))
                 .collect(Collectors.toList());
     }
 
