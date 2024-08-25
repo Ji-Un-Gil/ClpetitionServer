@@ -9,7 +9,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static clpetition.backend.gym.domain.QGym.gym;
 import static clpetition.backend.record.domain.QRecord.record;
@@ -37,11 +39,18 @@ public class GymQueryRepositoryImpl implements GymQueryRepository {
                                 .and(record.gym.eq(gym))
                 )
                 .where(gym.name.contains(gymName))
-                .orderBy(
-                        record.date.desc().nullsLast(),
-                        gym.name.asc()
-                )
-                .fetch();
+                .fetch()
+                .stream()
+                .collect(Collectors.toMap(
+                        GetTargetGymListResponse::gymId,
+                        response -> response,
+                        (existing, replacement) -> existing
+                ))
+                .values()
+                .stream()
+                .sorted(Comparator.comparing(GetTargetGymListResponse::isVisited, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(GetTargetGymListResponse::gymName))
+                .collect(Collectors.toList());
     }
 
     @Override
