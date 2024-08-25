@@ -47,7 +47,7 @@ public class GymService {
     public GetGymDetailsResponse getGymDetails(Gym gym, String shortName) {
         return toGetGymDetailsResponse(gym, shortName);
     }
-
+    
     /**
      * 암장명 리스트 조회
      * */
