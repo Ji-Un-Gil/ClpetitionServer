@@ -1,8 +1,15 @@
 package clpetition.backend.member.domain;
 
 import clpetition.backend.global.entity.BaseTimeEntity;
+import clpetition.backend.gym.domain.FavoriteGym;
+import clpetition.backend.gym.domain.VisitsGym;
+import clpetition.backend.league.domain.League;
+import clpetition.backend.record.domain.Record;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -36,6 +43,25 @@ public class Member extends BaseTimeEntity {
     private SocialType socialType;
 
     private String socialId; // 로그인한 소셜 타입의 식별자 값
+
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "member")
+    private List<League> leagues = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "member")
+    private List<Record> records = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "member")
+    private List<FavoriteGym> favoriteGyms = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "member")
+    private List<VisitsGym> visitsGyms = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "member")
+    private Profile profile;
 
     public void authorizeUser() {
         this.role = Role.USER;

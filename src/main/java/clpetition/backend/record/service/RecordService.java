@@ -51,6 +51,7 @@ public class RecordService {
      * 기록 추가
      * */
     public GetRecordIdResponse addRecord(Member member, AddRecordRequest addRecordRequest, List<MultipartFile> multipartFileList) {
+        isValidDate(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)));
         List<String> imageUrlList = fileService.uploadFiles(multipartFileList, IMAGE_DIR);
         Gym gym = gymService.getGym(addRecordRequest.getGymId());
         Record record = toRecord(member, addRecordRequest, gym, imageUrlList);
@@ -72,6 +73,8 @@ public class RecordService {
      * 기록 수정(삭제 후 저장)
      * */
     public GetRecordIdResponse changeRecord(Member member, Long recordId, AddRecordRequest addRecordRequest) {
+        isValidDate(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)));
+
         Record record = getRecordWithValidation(member, recordId);
         Hibernate.initialize(record.getImages());
         List<String> imageUrlList = Record.convertToImageUrls(record.getImages());
@@ -153,13 +156,28 @@ public class RecordService {
     }
 
     /**
-     * 기록 전체 상세 조회
+     * 기록 최신순으로 전체 상세 조회
      * */
     @Transactional(readOnly = true)
     public List<GetRecordDetailsResponse> getRecordDetailsAll(Member member) {
-        List<Record> records = getRecordsAll(member);
+        List<Record> records = getRecordsAllLatest(member);
         records.forEach(record -> Hibernate.initialize(record.getImages()));
         return toGetRecordDetailsListResponse(records);
+    }
+
+    /**
+     * 기록 전체 가져오기
+     * */
+    public List<Record> getRecordsAll(Member member) {
+        return getRecordsAllByMember(member);
+    }
+
+    /**
+     * 기록할 일자가 미래인 경우 오류
+     * */
+    private void isValidDate(LocalDate date) {
+        if (date.isAfter(LocalDate.now()))
+            throw new BaseException(BaseResponseStatus.RECORD_DATE_ERROR);
     }
 
     /**
@@ -218,7 +236,7 @@ public class RecordService {
     }
 
     /**
-     * 암장 삭제 (hard delete)
+     * 기록 삭제 (hard delete)
      * */
     private void deleteRecordById(Record record) {
         recordRepository.deleteById(record.getId());
@@ -303,9 +321,16 @@ public class RecordService {
     }
 
     /**
-     * (R) 전체 상세 기록 가져오기
+     * (R) 전체 상세 기록 최신순으로 가져오기
      * */
-    private List<Record> getRecordsAll(Member member) {
+    private List<Record> getRecordsAllLatest(Member member) {
         return recordRepository.findByMemberOrderByDateDesc(member);
+    }
+
+    /**
+     * (D) 전체 상세 기록 가져오기
+     * */
+    private List<Record> getRecordsAllByMember(Member member) {
+        return recordRepository.findByMember(member);
     }
 }

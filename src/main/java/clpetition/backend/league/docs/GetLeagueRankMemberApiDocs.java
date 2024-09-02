@@ -1,9 +1,9 @@
-package clpetition.backend.member.docs;
+package clpetition.backend.league.docs;
 
 import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
+import clpetition.backend.league.dto.response.GetLeagueRankMemberResponse;
 import clpetition.backend.member.domain.Member;
-import clpetition.backend.member.dto.response.GetProfileDetailsResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,34 +14,39 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 
-@Tag(name = "Member API", description = "사용자 API")
-public interface GetProfileDetailsApiDocs {
+@Tag(name = "League API", description = "이달의리그 API")
+public interface GetLeagueRankMemberApiDocs {
 
-    @Operation(summary = "프로필 정보 상세조회 API", description = "프로필 정보를 상세조회합니다.")
+    @Operation(summary = "이달의리그 내 순위 조회 API", description = "이달의리그 특정 난이도의 내 주변 순위를 조회합니다.")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "🟢 정상"),
                     @ApiResponse(
-                            responseCode = "404", description = "❌ 프로필이 존재하지 않음",
+                            responseCode = "404", description = "❌ 입력받은 난이도의 리그에 참여하고 있지 않은 사용자일 때",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = BaseResponse.class),
                                     examples = @ExampleObject(
                                             value = """
                                             {
-                                                "code": "PROFILE_001",
-                                                "message": "존재하지 않는 프로필입니다.",
+                                                "code": "LEAGUE_002",
+                                                "message": "해당 리그에 참여하고 있지 않습니다.",
                                                 "result": null
                                             }
                                             """
                                     )
+
                             )
                     ),
             }
     )
-    ResponseEntity<BaseResponse<GetProfileDetailsResponse>> getProfileDetails(
+    ResponseEntity<BaseResponse<GetLeagueRankMemberResponse>> getLeagueRankMember(
             @Parameter(hidden = true)
-            @FindMember Member member
+            @FindMember Member member,
+
+            @Parameter(description = "선택할 난이도", example = "노랑")
+            @RequestParam(value = "difficulty") String difficulty
     );
 }

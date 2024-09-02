@@ -1,5 +1,9 @@
 package clpetition.backend.member.service;
 
+import clpetition.backend.follow.service.FollowService;
+import clpetition.backend.global.infra.file.FileService;
+import clpetition.backend.gym.domain.FavoriteGym;
+import clpetition.backend.gym.service.GymService;
 import clpetition.backend.member.domain.Profile;
 import clpetition.backend.member.dto.request.AddMemberAgreementRequest;
 import clpetition.backend.member.dto.request.SocialLoginRequest;
@@ -9,12 +13,16 @@ import clpetition.backend.member.domain.Role;
 import clpetition.backend.member.domain.SocialType;
 import clpetition.backend.member.repository.MemberRepository;
 import clpetition.backend.member.repository.ProfileRepository;
+import clpetition.backend.record.domain.Record;
+import clpetition.backend.record.service.RecordService;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,6 +32,11 @@ public class AuthService {
 
     private final JwtService jwtService;
     private final FcmTokenService fcmTokenService;
+    private final FindMemberService findMemberService;
+    private final FollowService followService;
+    private final GymService gymService;
+    private final RecordService recordService;
+    private final FileService fileService;
     private final MemberRepository memberRepository;
     private final ProfileRepository profileRepository;
     private StringBuilder stringBuilder;
@@ -92,6 +105,29 @@ public class AuthService {
         fcmTokenService.saveFcmToken(member.getId(), fcmToken);
     }
 
+    public void deleteMember(Member member) {
+        member = findMemberService.getMember(member.getId());
+
+        // profile image
+        if (member.getProfileImage() != null && !member.getProfileImage().isEmpty() && fileService.isValidFile(member.getProfileImage()))
+            fileService.deleteFile(member.getProfileImage());
+
+        // record images
+        List<Record> recordList = recordService.getRecordsAll(member);
+        recordList.forEach(record -> Hibernate.initialize(record.getImages()));
+        for (Record record : recordList)
+            fileService.deleteFiles(Record.convertToImageUrls(record.getImages()));
+
+        // follow
+        followService.deleteFollowAll(member);
+
+        // gym favorite
+        for (FavoriteGym favoriteGym : member.getFavoriteGyms())
+            gymService.decreaseFavoriteGym(favoriteGym.getGym());
+
+        deleteMemberById(member);
+    }
+
     // 분기 처리, 유저 정보 반환
     private Member isRegister(SocialLoginRequest socialLoginRequest) {
         SocialType socialType = SocialType.valueOf(socialLoginRequest.getSocialType().toUpperCase());
@@ -120,7 +156,8 @@ public class AuthService {
         }
 
         // 분기 처리, 닉네임 중복 또는 공백 시 뒤에 랜덤값 추가
-        if (nickname.isBlank() || checkNickname(nickname))
+        stringBuilder = new StringBuilder();
+        if (nickname.isBlank() || checkNickname(stringBuilder.append(nickname).append("람쥐").toString()))
             nickname = createTemporaryNickname(nickname);
 
         // "람쥐" 추가
@@ -159,6 +196,10 @@ public class AuthService {
     }
 
     private boolean checkNickname(String nickname) {
-        return memberRepository.existsByNicknameAndRole(nickname, Role.USER).equals(true);
+        return memberRepository.existsByNicknameAndRole(nickname, Role.USER);
+    }
+
+    private void deleteMemberById(Member member) {
+        memberRepository.deleteById(member.getId());
     }
 }
