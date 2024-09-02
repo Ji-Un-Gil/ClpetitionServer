@@ -14,11 +14,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "Member API", description = "사용자 API")
 public interface GetProfileApiDocs {
 
-    @Operation(summary = "프로필 조회 API", description = "(마이페이지 첫 화면) 프로필을 조회합니다.")
+    @Operation(summary = "프로필 조회 API", description = "프로필 정보를 모두 조회합니다.")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "🟢 정상"),
@@ -42,6 +43,9 @@ public interface GetProfileApiDocs {
     )
     ResponseEntity<BaseResponse<GetProfileResponse>> getProfile(
             @Parameter(hidden = true)
-            @FindMember Member member
+            @FindMember Member member,
+
+            @Parameter(description = "탐색할 사용자 ID (null 경우 본인)", example = "2")
+            @RequestParam(value = "memberId", required = false) Long memberId
     );
 }

@@ -5,6 +5,7 @@ import clpetition.backend.global.response.BaseResponse;
 import clpetition.backend.member.docs.dto.request.UpdateProfileRequestSchema;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.dto.request.UpdateProfileRequest;
+import clpetition.backend.member.dto.response.UpdateProfileResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -62,7 +63,7 @@ public interface UpdateProfileApiDocs {
                     ),
             }
     )
-    ResponseEntity<BaseResponse<Void>> updateProfile(
+    ResponseEntity<BaseResponse<UpdateProfileResponse>> updateProfile(
             @Parameter(hidden = true)
             @FindMember Member member,
 

@@ -10,8 +10,8 @@ public interface GetProfileResponseSchema {
     @Schema(description = "닉네임", example = "위즈")
     String nickname();
 
-    @Schema(description = "프로필 이미지", example = "url", nullable = true)
-    String profileImage();
+    @Schema(description = "프로필 이미지 URL", example = "url", nullable = true)
+    String profileImageUrl();
 
     @Schema(description = "팔로워 수", example = "72")
     Long followerCount();
@@ -36,4 +36,13 @@ public interface GetProfileResponseSchema {
 
     @Schema(description = "인스타그램 주소", example = "https://www.instagram.com/example/", nullable = true)
     String instagram();
+
+    @Schema(description = "생년월일", example = "2000-01-01", nullable = true)
+    LocalDate birthDate();
+
+    @Schema(description = "성별", example = "남자", nullable = true)
+    String gender();
+
+    @Schema(description = "초대 코드", example = "wvKvv")
+    String inviteCode();
 }

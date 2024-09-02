@@ -25,6 +25,9 @@ public interface GetRecordHistoryApiDocs {
             @Parameter(hidden = true)
             @FindMember Member member,
 
+            @Parameter(description = "탐색할 사용자 ID (null 경우 본인)", example = "2")
+            @RequestParam(value = "memberId", required = false) Long memberId,
+
             @Parameter(description = "페이지의 마지막 등반 기록 ID", example = "6")
             @RequestParam(value = "lastRecordId", required = false) Long lastRecordId
     );
