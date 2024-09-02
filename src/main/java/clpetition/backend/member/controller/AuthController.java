@@ -4,6 +4,7 @@ import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
 import clpetition.backend.global.response.BaseResponseStatus;
 import clpetition.backend.member.docs.AddMemberAgreementApiDocs;
+import clpetition.backend.member.docs.DeleteMemberApiDocs;
 import clpetition.backend.member.docs.LogoutApiDocs;
 import clpetition.backend.member.docs.SocialLoginApiDocs;
 import clpetition.backend.member.domain.Member;
@@ -25,7 +26,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController implements
         SocialLoginApiDocs,
         AddMemberAgreementApiDocs,
-        LogoutApiDocs {
+        LogoutApiDocs,
+        DeleteMemberApiDocs {
 
     private final AuthService authService;
 
@@ -64,5 +66,13 @@ public class AuthController implements
     ) {
         authService.addFcmToken(member, fcmToken);
         return BaseResponse.toResponseEntityContainsStatus(BaseResponseStatus.SUCCESS);
+    }
+
+    @DeleteMapping("/withdrawal")
+    public ResponseEntity<BaseResponse<Void>> deleteMember(
+            @FindMember Member member
+    ) {
+        authService.deleteMember(member);
+        return BaseResponse.toResponseEntityContainsStatus(BaseResponseStatus.DELETED);
     }
 }
