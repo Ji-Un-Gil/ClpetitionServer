@@ -8,9 +8,9 @@ import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.domain.Profile;
 import clpetition.backend.member.domain.Role;
 import clpetition.backend.member.dto.request.UpdateProfileRequest;
-import clpetition.backend.member.dto.response.GetProfileDetailsResponse;
 import clpetition.backend.member.dto.response.GetProfileResponse;
 import clpetition.backend.member.dto.response.GetRecordHistoryPageResponse;
+import clpetition.backend.member.dto.response.UpdateProfileResponse;
 import clpetition.backend.member.repository.MemberRepository;
 import clpetition.backend.member.repository.ProfileRepository;
 import clpetition.backend.record.service.RecordService;
@@ -30,6 +30,7 @@ public class MemberService {
     private final RecordService recordService;
     private final FollowService followService;
     private final FileService fileService;
+    private final FindMemberService findMemberService;
     private final MemberRepository memberRepository;
     private final ProfileRepository profileRepository;
 
@@ -42,13 +43,17 @@ public class MemberService {
     public boolean checkNickname(Member member, String nickname) {
         if (member.getRole().equals(Role.USER) && member.getNickname().equals(nickname))
             return false;
-        return memberRepository.existsByNicknameAndRole(nickname, Role.USER).equals(true);
+        return memberRepository.existsByNicknameAndRole(nickname, Role.USER);
     }
 
     /**
      * 프로필 가져오기
      * */
-    public GetProfileResponse getProfile(Member member) {
+    @Transactional(readOnly = true)
+    public GetProfileResponse getProfile(Member member, Long memberId) {
+        if (memberId != null)
+            member = findMemberService.getMember(memberId);
+
         Map<String, Long> follow = followService.getFollowCount(member);
         Profile profile = findProfile(member);
         Long totalRecord = recordService.getTotalRecord(member);
@@ -56,28 +61,23 @@ public class MemberService {
     }
 
     /**
-     * 프로필 상세정보 가져오기
-     * */
-    @Transactional(readOnly = true)
-    public GetProfileDetailsResponse getProfileDetails(Member member) {
-        Profile profile = findProfile(member);
-        return toGetProfileDetailsResponse(member, profile);
-    }
-
-    /**
      * 프로필 수정
      * */
-    public void updateProfile(Member member, UpdateProfileRequest updateProfileRequest, MultipartFile multipartFile) throws IOException {
+    public UpdateProfileResponse updateProfile(Member member, UpdateProfileRequest updateProfileRequest, MultipartFile multipartFile) throws IOException {
         String imageUrl = updateProfileImage(member, multipartFile);
         updateNicknameAndProfileImage(member, updateProfileRequest.nickname(), imageUrl);
         Profile profile = findProfile(member);
         updateProfile(profile, updateProfileRequest);
+        return toUpdateProfileResponse(imageUrl);
     }
 
     /**
      * 사용자의 등반기록 최신순으로 가져오기
      * */
-    public GetRecordHistoryPageResponse getRecordHistory(Member member, Long lastRecordId) {
+    public GetRecordHistoryPageResponse getRecordHistory(Member member, Long memberId, Long lastRecordId) {
+        if (memberId != null)
+            member = findMemberService.getMember(memberId);
+
         return recordService.getRecordHistory(member, lastRecordId);
     }
 
@@ -95,7 +95,7 @@ public class MemberService {
     private GetProfileResponse toGetProfileResponse(Member member, Map<String, Long> follow, Profile profile, Long totalRecord) {
         return GetProfileResponse.builder()
                 .nickname(member.getNickname())
-                .profileImage(member.getProfileImage())
+                .profileImageUrl(member.getProfileImage())
                 .followerCount(follow.get("follower"))
                 .followingCount(follow.get("following"))
                 .mainGymName(profile.getMainGym() != null ? profile.getMainGym().getName() : null)
@@ -103,25 +103,10 @@ public class MemberService {
                 .reach(profile.getReach())
                 .totalRecord(totalRecord)
                 .startDate(profile.getStartDate())
-                .instagram(profile.getInstagram())
-                .build();
-    }
-
-    /**
-     * (R) 프로필 상세정보 가져오기 to dto
-     * */
-    private GetProfileDetailsResponse toGetProfileDetailsResponse(Member member, Profile profile) {
-        return GetProfileDetailsResponse.builder()
-                .nickname(member.getNickname())
-                .mainGymName(profile.getMainGym() != null ? profile.getMainGym().getName() : null)
-                .startDate(profile.getStartDate())
                 .birthDate(profile.getBirthDate())
                 .gender(profile.getGender() != null ? profile.getGender().getKey() : null)
-                .height(profile.getHeight())
-                .reach(profile.getReach())
                 .instagram(profile.getInstagram())
                 .inviteCode(profile.getInviteCode())
-                .profileImage(member.getProfileImage())
                 .build();
     }
 
@@ -149,5 +134,14 @@ public class MemberService {
      * */
     private void updateNicknameAndProfileImage(Member member, String nickname, String imageUrl) {
         memberRepository.updateNicknameAndProfileImage(member, nickname, imageUrl);
+    }
+
+    /**
+     * (U) 프로필 수정 후 프로필 이미지 dto 반환
+     * */
+    private UpdateProfileResponse toUpdateProfileResponse(String imageUrl) {
+        return UpdateProfileResponse.builder()
+                .profileImageUrl(imageUrl)
+                .build();
     }
 }

@@ -8,9 +8,9 @@ import clpetition.backend.member.annotation.NicknamePattern;
 import clpetition.backend.member.docs.*;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.dto.request.UpdateProfileRequest;
-import clpetition.backend.member.dto.response.GetProfileDetailsResponse;
 import clpetition.backend.member.dto.response.GetProfileResponse;
 import clpetition.backend.member.dto.response.GetRecordHistoryPageResponse;
+import clpetition.backend.member.dto.response.UpdateProfileResponse;
 import clpetition.backend.member.service.MemberService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -34,7 +34,6 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 public class MemberController implements
         CheckNicknameApiDocs,
         GetProfileApiDocs,
-        GetProfileDetailsApiDocs,
         UpdateProfileApiDocs,
         GetRecordHistoryApiDocs {
 
@@ -56,33 +55,27 @@ public class MemberController implements
 
     @GetMapping("/profile")
     public ResponseEntity<BaseResponse<GetProfileResponse>> getProfile(
-            @FindMember Member member
+            @FindMember Member member,
+            @RequestParam(value = "memberId", required = false) Long memberId
     ) {
-        return BaseResponse.toResponseEntityContainsResult(memberService.getProfile(member));
-    }
-
-    @GetMapping("/profile/details")
-    public ResponseEntity<BaseResponse<GetProfileDetailsResponse>> getProfileDetails(
-            @FindMember Member member
-    ) {
-        return BaseResponse.toResponseEntityContainsResult(memberService.getProfileDetails(member));
+        return BaseResponse.toResponseEntityContainsResult(memberService.getProfile(member, memberId));
     }
 
     @PatchMapping(value = "/profile", consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BaseResponse<Void>> updateProfile(
+    public ResponseEntity<BaseResponse<UpdateProfileResponse>> updateProfile(
             @FindMember Member member,
             @Valid @RequestPart("dto") UpdateProfileRequest updateProfileRequest,
             @RequestPart(value = "image", required = false) MultipartFile multipartFile
             ) throws IOException {
-        memberService.updateProfile(member, updateProfileRequest, multipartFile);
-        return BaseResponse.toResponseEntityContainsStatus(BaseResponseStatus.SUCCESS);
+        return BaseResponse.toResponseEntityContainsResult(memberService.updateProfile(member, updateProfileRequest, multipartFile));
     }
 
     @GetMapping("/history")
     public ResponseEntity<BaseResponse<GetRecordHistoryPageResponse>> getRecordHistory(
             @FindMember Member member,
+            @RequestParam(value = "memberId", required = false) Long memberId,
             @RequestParam(value = "lastRecordId", required = false) Long lastRecordId
     ) {
-        return BaseResponse.toResponseEntityContainsResult(memberService.getRecordHistory(member, lastRecordId));
+        return BaseResponse.toResponseEntityContainsResult(memberService.getRecordHistory(member, memberId, lastRecordId));
     }
 }
