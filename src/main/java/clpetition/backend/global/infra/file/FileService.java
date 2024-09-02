@@ -19,12 +19,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class FileService {
     private final AmazonS3 amazonS3Client;
+
+    private static final String BASE_URL = "https://clpetition-s3.s3.ap-northeast-2.amazonaws.com/member/";
+    private static final String FILE_HEAD = "/clpetition-";
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -79,6 +84,9 @@ public class FileService {
      * S3 Exists File
      * */
     public boolean isValidFile(String imageUrl) {
+        if (!isValidImageUrl(imageUrl))
+            return false;
+
         boolean isValidFile = true;
         try {
             amazonS3Client.getObjectMetadata(bucket, imageUrl.split("/")[3] + "/" + imageUrl.split("/")[4]);
@@ -139,6 +147,23 @@ public class FileService {
             return Optional.of(convertFile);
         }
         return Optional.of(convertFile);
+    }
+
+    private boolean isValidImageUrl(String imageUrl) {
+        if (imageUrl == null || !imageUrl.startsWith(BASE_URL)) {
+            return false;
+        }
+
+        String fileName = imageUrl.substring(BASE_URL.length());
+
+        String uuidPattern = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
+        String extensionPattern = "\\.[a-zA-Z0-9]{2,5}";
+        String fullPattern = "^" + FILE_HEAD.substring(1) + uuidPattern + extensionPattern + "$";
+
+        Pattern pattern = Pattern.compile(fullPattern);
+        Matcher matcher = pattern.matcher(fileName);
+
+        return matcher.matches();
     }
 }
 

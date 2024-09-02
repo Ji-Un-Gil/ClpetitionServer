@@ -70,6 +70,11 @@ public enum BaseResponseStatus implements BaseResponseStatusImpl {
 
     // Record
     RECORD_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "RECORD_001", "존재하지 않는 기록입니다."),
+    RECORD_DATE_ERROR(HttpStatus.BAD_REQUEST, "RECORD_002", "등반일은 미래일 수 없습니다."),
+
+    // League
+    LEAGUE_ALREADY_REGISTERED_ERROR(HttpStatus.CONFLICT, "LEAGUE_001", "이미 리그에 참여하고 있어 리그 등록을 할 수 없습니다."),
+    LEAGUE_MEMBER_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "LEAGUE_002", "해당 리그에 참여하고 있지 않습니다."),
 
     // Notice
     NOTICE_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "NOTICE_001", "존재하지 않는 공지입니다."),

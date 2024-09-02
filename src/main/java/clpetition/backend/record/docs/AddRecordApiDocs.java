@@ -51,6 +51,23 @@ public interface AddRecordApiDocs {
                             )
                     ),
                     @ApiResponse(
+                            responseCode = "400", description = "❌ 미래의 날짜를 등반일로 기록 시도",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = BaseResponse.class),
+                                    examples = @ExampleObject(
+                                            value = """
+                                            {
+                                                "code": "RECORD_002",
+                                                "message": "등반일은 미래일 수 없습니다.",
+                                                "result": null
+                                            }
+                                            """
+                                    )
+
+                            )
+                    ),
+                    @ApiResponse(
                             responseCode = "404", description = "❌ DB에 등록되지 않은 암장 저장 시도",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,

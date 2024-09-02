@@ -1,9 +1,8 @@
-package clpetition.backend.member.docs;
+package clpetition.backend.league.docs;
 
 import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
 import clpetition.backend.member.domain.Member;
-import clpetition.backend.member.dto.response.GetProfileResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,36 +15,37 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Tag(name = "Member API", description = "사용자 API")
-public interface GetProfileApiDocs {
+@Tag(name = "League API", description = "이달의리그 API")
+public interface AddLeagueApiDocs {
 
-    @Operation(summary = "프로필 조회 API", description = "프로필 정보를 모두 조회합니다.")
+    @Operation(summary = "이달의리그 참여 API", description = "이달의리그에 최초 참여합니다.")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "🟢 정상"),
                     @ApiResponse(
-                            responseCode = "404", description = "❌ 프로필이 존재하지 않음",
+                            responseCode = "409", description = "❌ 이미 이번 시즌 리그에 참여중인 사용자일 때",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = BaseResponse.class),
                                     examples = @ExampleObject(
                                             value = """
                                             {
-                                                "code": "PROFILE_001",
-                                                "message": "존재하지 않는 프로필입니다.",
+                                                "code": "LEAGUE_001",
+                                                "message": "이미 리그에 참여하고 있어 리그 등록을 할 수 없습니다.",
                                                 "result": null
                                             }
                                             """
                                     )
+
                             )
                     ),
             }
     )
-    ResponseEntity<BaseResponse<GetProfileResponse>> getProfile(
+    ResponseEntity<BaseResponse<Void>> addLeague(
             @Parameter(hidden = true)
             @FindMember Member member,
 
-            @Parameter(description = "탐색할 사용자 ID (null 경우 본인)", example = "2")
-            @RequestParam(value = "memberId", required = false) Long memberId
+            @Parameter(description = "선택할 난이도", example = "노랑")
+            @RequestParam(value = "difficulty") String difficulty
     );
 }

@@ -8,14 +8,17 @@ import java.time.LocalDate;
 @Builder
 public record GetProfileResponse(
         String nickname,
-        String profileImage,
-        Long followerCount,
-        Long followingCount,
         String mainGymName,
+        LocalDate startDate,
         Integer height,
         Integer reach,
+        String instagram,
+        String profileImageUrl,
+        Long followerCount,
+        Long followingCount,
         Long totalRecord,
-        LocalDate startDate,
-        String instagram
+        LocalDate birthDate,
+        String gender,
+        String inviteCode
 ) implements GetProfileResponseSchema {
 }

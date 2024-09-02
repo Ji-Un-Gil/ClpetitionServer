@@ -9,4 +9,5 @@ import java.util.List;
 public interface RecordRepository extends JpaRepository<Record, Long>, RecordQueryRepository {
     Long countByMember(Member member);
     List<Record> findByMemberOrderByDateDesc(Member member);
+    List<Record> findByMember(Member member);
 }
