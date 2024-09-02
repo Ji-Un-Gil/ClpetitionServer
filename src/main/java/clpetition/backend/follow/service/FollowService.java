@@ -45,6 +45,13 @@ public class FollowService {
     }
 
     /**
+     * 팔로우 및 팔로잉 취소 (회원탈퇴)
+     * */
+    public void deleteFollowAll(Member member) {
+        followRepository.deleteByFollowerOrFollowing(member, member);
+    }
+
+    /**
      * 팔로워, 팔로잉 수 가져오기
      * */
     public Map<String, Long> getFollowCount(Member member) {
