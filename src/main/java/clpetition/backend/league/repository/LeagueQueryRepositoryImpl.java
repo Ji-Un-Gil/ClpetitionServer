@@ -65,7 +65,6 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
             String nickname = result.get(member.nickname);
             Integer totalDay = Optional.ofNullable(result.get(totalDays)).orElse(0L).intValue();
             Integer totalSend = Optional.ofNullable(result.get(totalValue)).orElse(0);
-
             Long totalSecond = Optional.ofNullable(result.get(exerciseTimeInSeconds)).orElse(0L);
             Integer totalHour = Math.round(totalSecond / 3600f);
 
@@ -99,7 +98,6 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
     @Override
     public GetLeagueRankMemberResponse getLeagueRankMember(Member member, Integer season, Difficulty difficulty) {
         List<Tuple> results = fetchRank(season, difficulty);
-
 
         int targetIndex = -1;
         int highTotalSend = Integer.MAX_VALUE; // 등수를 올릴 수 있는, 나보다 높은 가장 가까운 완등 수
