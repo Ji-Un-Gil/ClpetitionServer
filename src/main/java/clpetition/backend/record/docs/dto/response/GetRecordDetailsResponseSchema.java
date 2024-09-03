@@ -51,18 +51,18 @@ public interface GetRecordDetailsResponseSchema {
                                                         """)
     List<String> imageUrls();
 
-    @Schema(description = "사용자 ID", example = "2", nullable = true)
+    @Schema(description = "사용자 ID(다른 사람 기록일 때)", example = "2", nullable = true)
     Long memberId();
 
-    @Schema(description = "프로필 사진 URL", example = "url", nullable = true)
+    @Schema(description = "프로필 사진 URL(다른 사람 기록일 때)", example = "url", nullable = true)
     String profileImageUrl();
 
-    @Schema(description = "닉네임", example = "위즈", nullable = true)
+    @Schema(description = "닉네임(다른 사람 기록일 때)", example = "위즈", nullable = true)
     String nickname();
 
-    @Schema(description = "리그 참여 난이도", example = "주황", nullable = true)
+    @Schema(description = "리그 참여 난이도(다른 사람 기록일 때)", example = "주황", nullable = true)
     String difficulty();
 
-    @Schema(description = "리그 순위", example = "17", nullable = true)
+    @Schema(description = "리그 순위(다른 사람 기록일 때)", example = "17", nullable = true)
     Integer rank();
 }
