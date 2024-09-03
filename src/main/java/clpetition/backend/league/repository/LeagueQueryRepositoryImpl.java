@@ -8,17 +8,13 @@ import clpetition.backend.league.dto.response.GetLeagueRankResponse;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.domain.QMember;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static clpetition.backend.league.domain.QLeague.league;
 import static clpetition.backend.member.domain.QMember.member;
@@ -32,62 +28,52 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
+    private final NumberTemplate<Long> exerciseTimeInSeconds = numberTemplate(
+            Long.class,
+            "COALESCE(SUM(CASE WHEN {0} IS NOT NULL THEN TIME_TO_SEC({1}) END), 0)",
+            difficulties.id,
+            record.exerciseTime
+    );
+
+    private final NumberTemplate<Long> totalDays = numberTemplate(
+            Long.class,
+            "COUNT(DISTINCT CASE WHEN {0} IS NOT NULL THEN {1} END)",
+            difficulties.id,
+            record.date
+    );
+
+    private final NumberTemplate<Integer> totalValue = numberTemplate(
+            Integer.class,
+            "COALESCE(SUM({0}), 0)",
+            difficulties.value
+    );
+
     @Override
     public List<GetLeagueRankResponse> getLeagueRankTopFifty(Integer season, Difficulty difficulty) {
-        NumberTemplate<Long> exerciseTimeInSeconds = numberTemplate(
-                Long.class, "TIME_TO_SEC({0})", record.exerciseTime
-        );
-
-        List<Tuple> results = jpaQueryFactory
-                .select(
-                        member.id,
-                        member.profileImage,
-                        member.nickname,
-                        record.date.countDistinct(),
-                        difficulties.value.sum(),
-                        exerciseTimeInSeconds.sum()
-                )
-                .from(league)
-                .leftJoin(record).on(
-                        record.member.eq(league.member)
-                                .and(record.date.between(LocalDate.now().withDayOfMonth(1), LocalDate.now()))
-                )
-                .leftJoin(member).on(league.member.eq(member))
-                .innerJoin(record.difficulties, difficulties)
-                .where(
-                        league.season.eq(season),
-                        league.difficulty.eq(difficulty),
-                        difficulties.difficulty.eq(difficulty)
-                )
-                .groupBy(member.id, member.profileImage, member.nickname)
-                .orderBy(
-                        Expressions.asNumber(difficulties.value.sum()).desc(),
-                        Expressions.asNumber(record.date.countDistinct()).asc()
-                )
-                .limit(50)
-                .fetch();
+        List<Tuple> results = fetchRank(season, difficulty);
 
         // 랭킹 리스트 생성
         List<GetLeagueRankResponse> getLeagueRankResponseList = new ArrayList<>();
         Integer rank = 1;
 
         for (int i = 0; i < results.size(); i++) {
+            if (i >= 50) break;
             Tuple result = results.get(i);
 
             Long memberId = result.get(member.id);
             String profileImageUrl = result.get(member.profileImage);
             String nickname = result.get(member.nickname);
-            Integer totalDay = Optional.ofNullable(result.get(record.date.countDistinct())).orElse(0L).intValue();
-            Integer totalSend = Optional.ofNullable(result.get(difficulties.value.sum())).orElse(0);
+            Integer totalDay = Optional.ofNullable(result.get(totalDays)).orElse(0L).intValue();
+            Integer totalSend = Optional.ofNullable(result.get(totalValue)).orElse(0);
 
-            Long totalSecond = Optional.ofNullable(result.get(exerciseTimeInSeconds.sum())).orElse(0L);
+            Long totalSecond = Optional.ofNullable(result.get(exerciseTimeInSeconds)).orElse(0L);
             Integer totalHour = Math.round(totalSecond / 3600f);
 
             // 동률 처리
             if (i > 0) {
                 Tuple previousResult = results.get(i - 1);
-                if (Optional.ofNullable(previousResult.get(difficulties.value.sum())).orElse(0).equals(totalSend) &&
-                        Optional.ofNullable(previousResult.get(record.date.countDistinct())).orElse(0L).equals(totalDay.longValue())) {
+                if (Optional.ofNullable(previousResult.get(totalValue)).orElse(0).equals(totalSend) &&
+                        Optional.ofNullable(previousResult.get(totalDays)).orElse(0L).equals(totalDay.longValue())) {
                     rank = getLeagueRankResponseList.get(i - 1).rank();
                 } else {
                     rank = i + 1;
@@ -112,37 +98,7 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
 
     @Override
     public GetLeagueRankMemberResponse getLeagueRankMember(Member member, Integer season, Difficulty difficulty) {
-        NumberTemplate<Long> exerciseTimeInSeconds = numberTemplate(
-                Long.class, "TIME_TO_SEC({0})", record.exerciseTime
-        );
-
-        List<Tuple> results = jpaQueryFactory
-                .select(
-                        QMember.member.id,
-                        QMember.member.profileImage,
-                        QMember.member.nickname,
-                        record.date.countDistinct(),
-                        difficulties.value.sum(),
-                        exerciseTimeInSeconds.sum()
-                )
-                .from(league)
-                .leftJoin(record).on(
-                        record.member.eq(league.member)
-                                .and(record.date.between(LocalDate.now().withDayOfMonth(1), LocalDate.now()))
-                )
-                .leftJoin(QMember.member).on(league.member.eq(QMember.member))
-                .innerJoin(record.difficulties, difficulties)
-                .where(
-                        league.season.eq(season),
-                        league.difficulty.eq(difficulty),
-                        difficulties.difficulty.eq(difficulty)
-                )
-                .groupBy(QMember.member.id, QMember.member.profileImage, QMember.member.nickname)
-                .orderBy(
-                        Expressions.asNumber(difficulties.value.sum()).desc(),
-                        Expressions.asNumber(record.date.countDistinct()).asc()
-                )
-                .fetch();
+        List<Tuple> results = fetchRank(season, difficulty);
 
 
         int targetIndex = -1;
@@ -158,7 +114,7 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
 
             // 다음으로 높은 완등 수 찾기 위한 작업
             if (targetIndex == -1) {
-                currentTotalSend = Optional.ofNullable(result.get(difficulties.value.sum())).orElse(0);
+                currentTotalSend = Optional.ofNullable(result.get(totalValue)).orElse(0);
                 if (nextTotalSend > currentTotalSend) {
                     highTotalSend = nextTotalSend;
                     nextTotalSend = currentTotalSend;
@@ -168,10 +124,10 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
             // 순위 매기기 작업
             if (i > 0) {
                 Tuple previousResult = results.get(i - 1);
-                if (Optional.ofNullable(previousResult.get(difficulties.value.sum())).orElse(0)
-                        .equals(Optional.ofNullable(result.get(difficulties.value.sum())).orElse(0)) &&
-                        Optional.ofNullable(previousResult.get(record.date.countDistinct())).orElse(0L)
-                                .equals(Optional.ofNullable(result.get(record.date.countDistinct())).orElse(0L))) {
+                if (Optional.ofNullable(previousResult.get(totalValue)).orElse(0)
+                        .equals(Optional.ofNullable(result.get(totalValue)).orElse(0)) &&
+                        Optional.ofNullable(previousResult.get(totalDays)).orElse(0L)
+                                .equals(Optional.ofNullable(result.get(totalDays)).orElse(0L))) {
                     rank = rankList.get(i - 1);
                 } else {
                     rank = i + 1;
@@ -204,9 +160,9 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
             Long memberId = result.get(QMember.member.id);
             String profileImageUrl = result.get(QMember.member.profileImage);
             String nickname = result.get(QMember.member.nickname);
-            Integer totalDay = Optional.ofNullable(result.get(record.date.countDistinct())).orElse(0L).intValue();
-            Integer totalSend = Optional.ofNullable(result.get(difficulties.value.sum())).orElse(0);
-            Long totalSecond = Optional.ofNullable(result.get(exerciseTimeInSeconds.sum())).orElse(0L);
+            Integer totalDay = Optional.ofNullable(result.get(totalDays)).orElse(0L).intValue();
+            Integer totalSend = Optional.ofNullable(result.get(totalValue)).orElse(0);
+            Long totalSecond = Optional.ofNullable(result.get(exerciseTimeInSeconds)).orElse(0L);
             Integer totalHour = Math.round(totalSecond / 3600f);
 
             getLeagueRankResponseList.add(
@@ -234,5 +190,119 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
                                 (rankList.get(targetIndex) > 1 ? 1 : -1) : highTotalSend - currentTotalSend + 1
                 )
                 .build();
+    }
+
+    @Override
+    public Integer getLeagueRank(Member member, Integer season, Difficulty difficulty) {
+        List<Tuple> results = fetchRank(season, difficulty);
+
+        // 시즌 전체가 존재하지 않는 상황일 때
+        if (results.isEmpty())
+            return null;
+
+        int targetIndex = -1;
+        List<Integer> rankList = new ArrayList<>(); // 순위표
+        int rank = 1;
+
+        // member 탐색, 순위 매기기
+        for (int i = 0; i < results.size(); i++) {
+            Tuple result = results.get(i);
+
+            // 순위 매기기 작업
+            if (i > 0) {
+                Tuple previousResult = results.get(i - 1);
+                if (Optional.ofNullable(previousResult.get(totalValue)).orElse(0)
+                        .equals(Optional.ofNullable(result.get(totalValue)).orElse(0)) &&
+                        Optional.ofNullable(previousResult.get(totalDays)).orElse(0L)
+                                .equals(Optional.ofNullable(result.get(totalDays)).orElse(0L))) {
+                    rank = rankList.get(i - 1);
+                } else {
+                    rank = i + 1;
+                }
+            }
+            rankList.add(rank);
+
+            // member 찾기 위한 작업
+            if (Objects.equals(result.get(QMember.member.id), member.getId())) {
+                targetIndex = i;
+                break;
+            }
+        }
+
+        if (targetIndex == -1)
+            throw new BaseException(BaseResponseStatus.LEAGUE_MEMBER_NOT_FOUND_ERROR);
+
+        return rank;
+    }
+
+    @Override
+    public Map<String, Integer> getLeagueRankAndTotalSend(Member member, Integer season, Difficulty difficulty) {
+        List<Tuple> results = fetchRank(season, difficulty);
+
+        int targetIndex = -1;
+        List<Integer> rankList = new ArrayList<>(); // 순위표
+        int rank = 1;
+        int totalSend = 0;
+
+        // member 탐색, 순위 매기기
+        for (int i = 0; i < results.size(); i++) {
+            Tuple result = results.get(i);
+
+            // 순위 매기기 작업
+            if (i > 0) {
+                Tuple previousResult = results.get(i - 1);
+                if (Optional.ofNullable(previousResult.get(totalValue)).orElse(0)
+                        .equals(Optional.ofNullable(result.get(totalValue)).orElse(0)) &&
+                        Optional.ofNullable(previousResult.get(totalDays)).orElse(0L)
+                                .equals(Optional.ofNullable(result.get(totalDays)).orElse(0L))) {
+                    rank = rankList.get(i - 1);
+                } else {
+                    rank = i + 1;
+                }
+            }
+            rankList.add(rank);
+
+            // member 찾기 위한 작업
+            if (Objects.equals(result.get(QMember.member.id), member.getId())) {
+                targetIndex = i;
+                totalSend = Optional.ofNullable(result.get(totalValue)).orElse(0);
+                break;
+            }
+        }
+
+        if (targetIndex == -1)
+            throw new BaseException(BaseResponseStatus.LEAGUE_MEMBER_NOT_FOUND_ERROR);
+
+        return Map.of("rank", rank, "totalSend", totalSend);
+    }
+
+    private List<Tuple> fetchRank(Integer season, Difficulty difficulty) {
+        return jpaQueryFactory
+                .select(
+                        member.id,
+                        member.profileImage,
+                        member.nickname,
+                        totalDays,
+                        totalValue,
+                        exerciseTimeInSeconds
+                )
+                .from(league)
+                .leftJoin(member).on(league.member.eq(member))
+                .leftJoin(record).on(
+                        record.member.eq(league.member)
+                                .and(record.date.between(LocalDate.now().withDayOfMonth(1), LocalDate.now()))
+                )
+                .leftJoin(record.difficulties, difficulties)
+                .on(difficulties.difficulty.eq(difficulty))
+                .where(
+                        league.season.eq(season),
+                        league.difficulty.eq(difficulty)
+                )
+                .groupBy(member.id, member.profileImage, member.nickname)
+                .orderBy(
+                        totalValue.desc(),
+                        totalDays.asc()
+                )
+                .fetch();
     }
 }
