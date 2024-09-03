@@ -4,6 +4,7 @@ import clpetition.backend.follow.service.FollowService;
 import clpetition.backend.global.infra.file.FileService;
 import clpetition.backend.global.response.BaseException;
 import clpetition.backend.global.response.BaseResponseStatus;
+import clpetition.backend.league.service.LeagueService;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.domain.Profile;
 import clpetition.backend.member.domain.Role;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +33,7 @@ public class MemberService {
     private final FollowService followService;
     private final FileService fileService;
     private final FindMemberService findMemberService;
+    private final LeagueService leagueService;
     private final MemberRepository memberRepository;
     private final ProfileRepository profileRepository;
 
@@ -57,7 +60,8 @@ public class MemberService {
         Map<String, Long> follow = followService.getFollowCount(member);
         Profile profile = findProfile(member);
         Long totalRecord = recordService.getTotalRecord(member);
-        return toGetProfileResponse(member, follow, profile, totalRecord);
+        Map<String, Object> leagueBrief = leagueService.getLeagueBrief(member);
+        return toGetProfileResponse(member, follow, profile, totalRecord, leagueBrief);
     }
 
     /**
@@ -75,10 +79,13 @@ public class MemberService {
      * 사용자의 등반기록 최신순으로 가져오기
      * */
     public GetRecordHistoryPageResponse getRecordHistory(Member member, Long memberId, Long lastRecordId) {
-        if (memberId != null)
+        boolean isMyself = true;
+        if (memberId != null) {
             member = findMemberService.getMember(memberId);
+            isMyself = false;
+        }
 
-        return recordService.getRecordHistory(member, lastRecordId);
+        return recordService.getRecordHistory(member, lastRecordId, isMyself);
     }
 
     /**
@@ -92,7 +99,7 @@ public class MemberService {
     /**
      * (R) 프로필 가져오기 to dto
      * */
-    private GetProfileResponse toGetProfileResponse(Member member, Map<String, Long> follow, Profile profile, Long totalRecord) {
+    private GetProfileResponse toGetProfileResponse(Member member, Map<String, Long> follow, Profile profile, Long totalRecord, Map<String, Object> leagueBrief) {
         return GetProfileResponse.builder()
                 .nickname(member.getNickname())
                 .profileImageUrl(member.getProfileImage())
@@ -107,6 +114,8 @@ public class MemberService {
                 .gender(profile.getGender() != null ? profile.getGender().getKey() : null)
                 .instagram(profile.getInstagram())
                 .inviteCode(profile.getInviteCode())
+                .difficulty(!leagueBrief.get("difficulty").equals(Optional.empty()) ? leagueBrief.get("difficulty").toString() : null)
+                .rank(!leagueBrief.get("rank").equals(Optional.empty()) ? Integer.parseInt(leagueBrief.get("rank").toString()) : null)
                 .build();
     }
 

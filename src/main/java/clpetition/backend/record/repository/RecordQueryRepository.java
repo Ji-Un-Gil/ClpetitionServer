@@ -18,5 +18,5 @@ public interface RecordQueryRepository {
     List<Record> findRecordsPerMonth(Member member, YearMonth yearMonth);
     List<GetRelatedRecordResponse> findRelatedRecord(Gym gym);
     GetMainHistoryResponse findMainHistory(Member member, YearMonth yearMonth);
-    GetRecordHistoryPageResponse findRecordHistory(Member member, Long lastRecordId);
+    GetRecordHistoryPageResponse findRecordHistory(Member member, Long lastRecordId, boolean isMyself);
 }

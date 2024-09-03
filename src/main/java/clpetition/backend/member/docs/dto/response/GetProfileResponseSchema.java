@@ -45,4 +45,10 @@ public interface GetProfileResponseSchema {
 
     @Schema(description = "초대 코드", example = "wvKvv")
     String inviteCode();
+
+    @Schema(description = "리그 난이도", example = "주황", nullable = true)
+    String difficulty();
+
+    @Schema(description = "리그 순위", example = "17", nullable = true)
+    Integer rank();
 }

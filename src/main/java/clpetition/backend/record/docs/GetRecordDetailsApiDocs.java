@@ -24,7 +24,7 @@ public interface GetRecordDetailsApiDocs {
             value = {
                     @ApiResponse(responseCode = "200", description = "🟢 정상"),
                     @ApiResponse(
-                            responseCode = "404", description = "❌ 입력받은 등반 기록 ID가 DB에 존재하지 않거나, 현재 사용자의 등반 기록이 아님",
+                            responseCode = "404", description = "❌ 입력받은 등반 기록 ID가 DB에 존재하지 않거나, 타인의 private 등반 기록을 조회하려고 시도",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = BaseResponse.class),

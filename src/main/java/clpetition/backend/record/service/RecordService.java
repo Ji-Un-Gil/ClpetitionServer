@@ -7,6 +7,7 @@ import clpetition.backend.gym.domain.Gym;
 import clpetition.backend.gym.service.FavoriteGymService;
 import clpetition.backend.gym.service.GymService;
 import clpetition.backend.gym.service.VisitsGymService;
+import clpetition.backend.league.service.LeagueService;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.dto.response.GetRecordHistoryPageResponse;
 import clpetition.backend.record.domain.Difficulties;
@@ -28,6 +29,8 @@ import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +42,7 @@ public class RecordService {
     private final VisitsGymService visitsGymService;
     private final FavoriteGymService favoriteGymService;
     private final FileService fileService;
+    private final LeagueService leagueService;
     private final RecordRepository recordRepository;
     private final RecordImagesRepository recordImagesRepository;
     private final DifficultiesRepository difficultiesRepository;
@@ -64,9 +68,18 @@ public class RecordService {
      * */
     @Transactional(readOnly = true)
     public GetRecordDetailsResponse getRecordDetails(Member member, Long recordId) {
-        Record record = getRecordWithValidation(member, recordId);
+        Record record = getRecordById(recordId);
         Hibernate.initialize(record.getImages());
-        return toGetRecordDetailsResponse(record, null);
+        Member recordMember = record.getMember();
+        // 본인 기록 조회
+        if (member.getId().equals(recordMember.getId()))
+            return toGetRecordDetailsResponse(record, null);
+        // 타인 기록 조회
+        if (record.getIsPrivate())
+            throw new BaseException(BaseResponseStatus.RECORD_NOT_FOUND_ERROR);
+
+        Map<String, Object> leagueBrief = leagueService.getLeagueBrief(recordMember);
+        return toGetRecordDetailsResponseOthers(record, null, recordMember, leagueBrief);
     }
 
     /**
@@ -151,8 +164,8 @@ public class RecordService {
     /**
      * 사용자의 등반기록 최신순으로 가져오기
      * */
-    public GetRecordHistoryPageResponse getRecordHistory(Member member, Long lastRecordId) {
-        return findRecordHistory(member, lastRecordId);
+    public GetRecordHistoryPageResponse getRecordHistory(Member member, Long lastRecordId, boolean isMyself) {
+        return findRecordHistory(member, lastRecordId, isMyself);
     }
 
     /**
@@ -203,7 +216,7 @@ public class RecordService {
     }
 
     /**
-     * 기록 상세조회 to dto
+     * 기록 상세조회 to dto (myself)
      * */
     private GetRecordDetailsResponse toGetRecordDetailsResponse(Record record, String shortName) {
         return GetRecordDetailsResponse.builder()
@@ -221,7 +234,39 @@ public class RecordService {
     }
 
     /**
-     * (RUD) 기록 가져오기
+     * 기록 상세조회 to dto (others)
+     * */
+    private GetRecordDetailsResponse toGetRecordDetailsResponseOthers(Record record, String shortName, Member member, Map<String, Object> leagueBrief) {
+        return GetRecordDetailsResponse.builder()
+                .recordId(record.getId())
+                .gym(gymService.getGymDetails(record.getGym(), shortName))
+                .date(record.getDate())
+                .weekday(record.getDate().getDayOfWeek().getValue())
+                .difficulties(Difficulties.convertToDifficultiesMap(record.getDifficulties()))
+                .memo(record.getMemo())
+                .exerciseTime(record.getExerciseTime())
+                .satisfaction(record.getSatisfaction())
+                .isPrivate(record.getIsPrivate())
+                .imageUrls(Record.convertToImageUrls(record.getImages()))
+                .memberId(member.getId())
+                .profileImageUrl(member.getProfileImage())
+                .nickname(member.getNickname())
+                .difficulty(!leagueBrief.get("difficulty").equals(Optional.empty()) ? leagueBrief.get("difficulty").toString() : null)
+                .rank(!leagueBrief.get("rank").equals(Optional.empty()) ? Integer.parseInt(leagueBrief.get("rank").toString()) : null)
+                .build();
+    }
+
+    /**
+     * (R) 기록 가져오기
+     * 1. 요청 기록 존재여부 확인
+     * */
+    private Record getRecordById(Long recordId) {
+        return recordRepository.findById(recordId)
+                .orElseThrow(() -> new BaseException(BaseResponseStatus.RECORD_NOT_FOUND_ERROR));
+    }
+
+    /**
+     * (UD) 기록 가져오기
      * 1. 요청 기록 존재여부 확인
      * 2. 요청 사용자와 요청 기록의 소유자 동일인인지 확인
      * */
@@ -316,8 +361,8 @@ public class RecordService {
     /**
      * (R) 사용자의 등반기록 최신순으로 가져오기
      * */
-    private GetRecordHistoryPageResponse findRecordHistory(Member member, Long lastRecordId) {
-        return recordRepository.findRecordHistory(member, lastRecordId);
+    private GetRecordHistoryPageResponse findRecordHistory(Member member, Long lastRecordId, boolean isMyself) {
+        return recordRepository.findRecordHistory(member, lastRecordId, isMyself);
     }
 
     /**
