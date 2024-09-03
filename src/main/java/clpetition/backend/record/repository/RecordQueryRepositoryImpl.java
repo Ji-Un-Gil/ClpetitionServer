@@ -129,7 +129,8 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
                 .selectFrom(record)
                 .where(
                         record.gym.eq(gym),
-                        record.images.isNotEmpty()
+                        record.images.isNotEmpty(),
+                        record.isPrivate.eq(false)
                 )
                 .orderBy(record.date.desc())
                 .limit(RELATED_RECORD_SIZE)
@@ -168,7 +169,7 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
     }
 
     @Override
-    public GetRecordHistoryPageResponse findRecordHistory(Member member, Long lastRecordId) {
+    public GetRecordHistoryPageResponse findRecordHistory(Member member, Long lastRecordId, boolean isMyself) {
         LocalDate lastRecordDate = jpaQueryFactory
                 .select(record.date)
                 .from(record)
@@ -195,13 +196,12 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
                         record.member.eq(member),
                         lastRecordId != null ?
                                 (record.date.lt(lastRecordDate)
-                                        .or(record.date.eq(lastRecordDate).and(record.id.lt(lastRecordId)))) : null
+                                        .or(record.date.eq(lastRecordDate).and(record.id.lt(lastRecordId)))) : null,
+                        isMyself ? null : record.isPrivate.eq(false)
                 )
                 .orderBy(record.date.desc(), record.id.desc())
                 .limit(PAGE_SIZE + 1)
                 .fetch();
-
-
 
         boolean hasNext = results.size() > PAGE_SIZE;
         if (hasNext)

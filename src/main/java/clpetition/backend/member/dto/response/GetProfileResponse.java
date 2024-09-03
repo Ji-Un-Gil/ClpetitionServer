@@ -19,6 +19,8 @@ public record GetProfileResponse(
         Long totalRecord,
         LocalDate birthDate,
         String gender,
-        String inviteCode
+        String inviteCode,
+        String difficulty,
+        Integer rank
 ) implements GetProfileResponseSchema {
 }
