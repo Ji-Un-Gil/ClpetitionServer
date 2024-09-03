@@ -71,8 +71,13 @@ public class RecordService {
         Record record = getRecordById(recordId);
         Hibernate.initialize(record.getImages());
         Member recordMember = record.getMember();
+        // 본인 기록 조회
         if (member.getId().equals(recordMember.getId()))
             return toGetRecordDetailsResponse(record, null);
+        // 타인 기록 조회
+        if (record.getIsPrivate())
+            throw new BaseException(BaseResponseStatus.RECORD_NOT_FOUND_ERROR);
+
         Map<String, Object> leagueBrief = leagueService.getLeagueBrief(recordMember);
         return toGetRecordDetailsResponseOthers(record, null, recordMember, leagueBrief);
     }
