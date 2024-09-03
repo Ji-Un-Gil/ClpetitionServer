@@ -56,7 +56,7 @@ public class RecordController implements
             @PathVariable("recordId") Long recordId
     ) {
         return BaseResponse.toResponseEntityContainsResult
-                (recordService.getRecordDetails(recordId));
+                (recordService.getRecordDetails(member, recordId));
     }
 
     @PutMapping(value = "/{recordId}")

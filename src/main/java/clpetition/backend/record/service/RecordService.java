@@ -67,12 +67,14 @@ public class RecordService {
      * 기록 상세조회
      * */
     @Transactional(readOnly = true)
-    public GetRecordDetailsResponse getRecordDetails(Long recordId) {
+    public GetRecordDetailsResponse getRecordDetails(Member member, Long recordId) {
         Record record = getRecordById(recordId);
         Hibernate.initialize(record.getImages());
-        Member member = record.getMember();
-        Map<String, Object> leagueBrief = leagueService.getLeagueBrief(member);
-        return toGetRecordDetailsResponseOthers(record, null, member, leagueBrief);
+        Member recordMember = record.getMember();
+        if (member.getId().equals(recordMember.getId()))
+            return toGetRecordDetailsResponse(record, null);
+        Map<String, Object> leagueBrief = leagueService.getLeagueBrief(recordMember);
+        return toGetRecordDetailsResponseOthers(record, null, recordMember, leagueBrief);
     }
 
     /**
