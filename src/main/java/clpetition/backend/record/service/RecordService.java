@@ -55,7 +55,8 @@ public class RecordService {
      * 기록 추가
      * */
     public GetRecordIdResponse addRecord(Member member, AddRecordRequest addRecordRequest, List<MultipartFile> multipartFileList) {
-        isValidDate(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)));
+        // 미래일 추가 불가
+        // isValidDate(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)));
         List<String> imageUrlList = fileService.uploadFiles(multipartFileList, IMAGE_DIR);
         Gym gym = gymService.getGym(addRecordRequest.getGymId());
         Record record = toRecord(member, addRecordRequest, gym, imageUrlList);
@@ -86,7 +87,8 @@ public class RecordService {
      * 기록 수정(삭제 후 저장)
      * */
     public GetRecordIdResponse changeRecord(Member member, Long recordId, AddRecordRequest addRecordRequest) {
-        isValidDate(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)));
+        // 미래일 추가 불가
+        // isValidDate(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)));
 
         Record record = getRecordWithValidation(member, recordId);
         Hibernate.initialize(record.getImages());
@@ -186,7 +188,7 @@ public class RecordService {
     }
 
     /**
-     * 기록할 일자가 미래인 경우 오류
+     * 기록할 일자가 미래인 경우 오류 (정책 변경으로 보류)
      * */
     private void isValidDate(LocalDate date) {
         if (date.isAfter(LocalDate.now()))
