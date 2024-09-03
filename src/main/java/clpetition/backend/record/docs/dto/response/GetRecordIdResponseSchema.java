@@ -8,7 +8,7 @@ import java.util.List;
 public interface GetRecordIdResponseSchema {
 
     @Schema(description = "등반 기록 ID", example = "3")
-    Long getRecordId();
+    Long recordId();
 
     @Schema(description = "첨부 이미지 URL 목록", example = """
                                                         [
@@ -16,5 +16,5 @@ public interface GetRecordIdResponseSchema {
                                                             "url2"
                                                         ]
                                                         """)
-    List<String> getImageUrls();
+    List<String> imageUrls();
 }
