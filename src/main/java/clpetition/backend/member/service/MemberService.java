@@ -69,6 +69,8 @@ public class MemberService {
      * */
     public UpdateProfileResponse updateProfile(Member member, UpdateProfileRequest updateProfileRequest, MultipartFile multipartFile) throws IOException {
         String imageUrl = updateProfileImage(member, multipartFile);
+        if (imageUrl == null)
+            imageUrl = member.getProfileImage();
         updateNicknameAndProfileImage(member, updateProfileRequest.nickname(), imageUrl);
         Profile profile = findProfile(member);
         updateProfile(profile, updateProfileRequest);
