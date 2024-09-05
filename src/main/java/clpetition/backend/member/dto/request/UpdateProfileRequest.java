@@ -8,9 +8,9 @@ import lombok.Builder;
 public record UpdateProfileRequest(
         String nickname,
         Long mainGymId,
-        @LocalDatePattern
+        @LocalDatePattern(nullable = true)
         String startDate,
-        @LocalDatePattern
+        @LocalDatePattern(nullable = true)
         String birthDate,
         String gender,
         Integer height,
