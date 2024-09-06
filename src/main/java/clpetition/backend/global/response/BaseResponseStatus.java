@@ -61,6 +61,7 @@ public enum BaseResponseStatus implements BaseResponseStatusImpl {
 
     // Gym
     GYM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "GYM_001", "존재하지 않는 암장입니다."),
+    GYM_ALREADY_EXISTS_ERROR(HttpStatus.CONFLICT, "GYM_002", "이미 존재하는 암장입니다."),
 
     // FavoriteGym
     FAVORITE_GYM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "FAVORITE_GYM_001", "해당 암장은 관심 등록이 되어있지 않습니다."),

@@ -3,7 +3,9 @@ package clpetition.backend.gym.service;
 import clpetition.backend.global.response.BaseException;
 import clpetition.backend.global.response.BaseResponseStatus;
 import clpetition.backend.gym.domain.Gym;
+import clpetition.backend.gym.dto.request.AddGymRequest;
 import clpetition.backend.gym.dto.response.GetGymDetailsResponse;
+import clpetition.backend.gym.dto.response.GetGymIdResponse;
 import clpetition.backend.gym.dto.response.GetTargetGymListResponse;
 import clpetition.backend.gym.repository.GymRepository;
 import clpetition.backend.member.domain.Member;
@@ -53,6 +55,48 @@ public class GymService {
      * */
     public List<GetTargetGymListResponse> getTargetGymList(Member member, String gymName) {
         return toGetTargetGymListResponseList(member, gymName);
+    }
+
+    /**
+     * 암장 추가
+     * */
+    public GetGymIdResponse addGym(AddGymRequest addGymRequest) {
+        validGym(addGymRequest.name(), addGymRequest.address());
+        return toGetGymIdResponse(
+                saveGym(addGymRequest)
+        );
+    }
+
+    /**
+     * 암장 추가 시 중복 체크
+     * */
+    private void validGym(String name, String address) {
+        if (gymRepository.existsByNameOrAddress(name, address))
+            throw new BaseException(BaseResponseStatus.GYM_ALREADY_EXISTS_ERROR);
+    }
+
+    /**
+     * 암장 저장
+     * */
+    private Long saveGym(AddGymRequest addGymRequest) {
+        return gymRepository.save(
+                Gym.builder()
+                        .name(addGymRequest.name())
+                        .region(addGymRequest.region())
+                        .address(addGymRequest.address())
+                        .shortName(addGymRequest.shortName())
+                        .favorites(0L)
+                        .build()
+        ).getId();
+    }
+
+    /**
+     * 암장 추가 to dto
+     * */
+    private GetGymIdResponse toGetGymIdResponse(Long id) {
+        return GetGymIdResponse.builder()
+                .gymId(id)
+                .build();
     }
 
     /**
