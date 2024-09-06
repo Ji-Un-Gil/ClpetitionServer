@@ -141,13 +141,13 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
         if (targetIndex == -1)
             throw new BaseException(BaseResponseStatus.LEAGUE_MEMBER_NOT_FOUND_ERROR);
 
-        // member 앞뒤 +2(예외 포함)가 되도록 범위 지정
+        // member 앞뒤 +25(예외 포함)가 되도록 범위 지정
         int startIndex, endIndex;
-        startIndex = Math.max(0, targetIndex - 2);
+        startIndex = Math.max(0, targetIndex - 25);
         switch (targetIndex) {
-            case 0 -> endIndex = Math.min(results.size(), targetIndex + 5);
-            case 1 -> endIndex = Math.min(results.size(), targetIndex + 4);
-            default -> endIndex = Math.min(results.size(), targetIndex + 3);
+            case 0 -> endIndex = Math.min(results.size(), targetIndex + 28);
+            case 1 -> endIndex = Math.min(results.size(), targetIndex + 27);
+            default -> endIndex = Math.min(results.size(), targetIndex + 26);
         }
 
         List<GetLeagueRankResponse> getLeagueRankResponseList = new ArrayList<>();
