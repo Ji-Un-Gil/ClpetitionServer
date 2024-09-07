@@ -19,8 +19,8 @@ public interface GetProfileResponseSchema {
     @Schema(description = "팔로잉 수", example = "113")
     Long followingCount();
 
-    @Schema(description = "대표 암장명", example = "더클라임 신림점", nullable = true)
-    String mainGymName();
+    @Schema(description = "메인 암장 ID", example = "10", nullable = true)
+    Long mainGymId();
 
     @Schema(description = "키", example = "170", nullable = true)
     Integer height();
