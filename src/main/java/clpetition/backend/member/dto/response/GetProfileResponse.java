@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Builder
 public record GetProfileResponse(
         String nickname,
-        String mainGymName,
+        Long mainGymId,
         LocalDate startDate,
         Integer height,
         Integer reach,
