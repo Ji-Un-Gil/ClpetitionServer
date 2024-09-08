@@ -63,6 +63,6 @@ public interface GetRecordDetailsResponseSchema {
     @Schema(description = "리그 참여 난이도(다른 사람 기록일 때)", example = "주황", nullable = true)
     String difficulty();
 
-    @Schema(description = "리그 순위(다른 사람 기록일 때)", example = "17", nullable = true)
-    Integer rank();
+    @Schema(description = "리그 순위(다른 사람 기록일 때), Integer가 아닌 String임을 주의", example = "17", nullable = true)
+    String rank();
 }
