@@ -25,6 +25,6 @@ public record GetRecordDetailsResponse(
         String profileImageUrl,
         String nickname,
         String difficulty,
-        Integer rank
+        String rank
 ) implements GetRecordDetailsResponseSchema {
 }

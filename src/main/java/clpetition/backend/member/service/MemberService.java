@@ -117,7 +117,7 @@ public class MemberService {
                 .instagram(profile.getInstagram())
                 .inviteCode(profile.getInviteCode())
                 .difficulty(!leagueBrief.get("difficulty").equals(Optional.empty()) ? leagueBrief.get("difficulty").toString() : null)
-                .rank(!leagueBrief.get("rank").equals(Optional.empty()) ? Integer.parseInt(leagueBrief.get("rank").toString()) : null)
+                .rank(!leagueBrief.get("rank").equals(Optional.empty()) ? leagueBrief.get("rank").toString() : null)
                 .build();
     }
 

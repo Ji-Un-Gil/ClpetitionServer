@@ -254,7 +254,7 @@ public class RecordService {
                 .profileImageUrl(member.getProfileImage())
                 .nickname(member.getNickname())
                 .difficulty(!leagueBrief.get("difficulty").equals(Optional.empty()) ? leagueBrief.get("difficulty").toString() : null)
-                .rank(!leagueBrief.get("rank").equals(Optional.empty()) ? Integer.parseInt(leagueBrief.get("rank").toString()) : null)
+                .rank(!leagueBrief.get("rank").equals(Optional.empty()) ? leagueBrief.get("rank").toString() : null)
                 .build();
     }
 
