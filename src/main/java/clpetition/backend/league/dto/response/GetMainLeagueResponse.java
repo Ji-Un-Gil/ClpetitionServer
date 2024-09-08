@@ -6,7 +6,7 @@ import lombok.Builder;
 @Builder
 public record GetMainLeagueResponse(
         String difficulty,
-        Integer rank,
+        String rank,
         Integer totalSend,
         Integer gapRecentMonth
 ) implements GetMainLeagueResponseSchema {

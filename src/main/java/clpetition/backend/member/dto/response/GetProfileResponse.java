@@ -21,6 +21,6 @@ public record GetProfileResponse(
         String gender,
         String inviteCode,
         String difficulty,
-        Integer rank
+        String rank
 ) implements GetProfileResponseSchema {
 }

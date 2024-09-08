@@ -3,9 +3,9 @@ package clpetition.backend.league.dto.response;
 import clpetition.backend.league.docs.dto.response.GetLeagueRankResponseSchema;
 import lombok.Builder;
 
-@Builder
+@Builder(toBuilder = true)
 public record GetLeagueRankResponse(
-        Integer rank,
+        String rank,
         Long memberId,
         String profileImageUrl,
         String nickname,

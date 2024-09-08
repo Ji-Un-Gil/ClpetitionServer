@@ -67,7 +67,7 @@ public class LeagueService {
             return Map.of("difficulty", Optional.empty(), "rank", Optional.empty());
 
         Difficulty difficulty = league.get().getDifficulty();
-        Integer rank = getLeagueRank(member, SEASON, difficulty);
+        String rank = getLeagueRank(member, SEASON, difficulty);
 
         return Map.of("difficulty", difficulty.getKey(), "rank", rank);
     }
@@ -83,13 +83,17 @@ public class LeagueService {
             return GetMainLeagueResponse.builder().build();
 
         Difficulty difficulty = league.get().getDifficulty();
-        Map<String, Integer> rankAndTotalSend = getLeagueRankAndTotalSend(member, difficulty);
+        Map<String, Object> rankAndTotalSend = getLeagueRankAndTotalSend(member, difficulty);
 
         if (recentLeague.isEmpty())
             return toGetMainLeagueResponse(difficulty, rankAndTotalSend, null);
-        Integer recentRank = getLeagueRank(member, SEASON - 1, difficulty);
+        String recentRank = getLeagueRank(member, SEASON - 1, difficulty);
 
-        return toGetMainLeagueResponse(difficulty, rankAndTotalSend, recentRank - rankAndTotalSend.get("rank"));
+        int recentRankInt = Integer.parseInt(recentRank);
+        int currentRankInt = Integer.parseInt(rankAndTotalSend.get("rank").toString());
+        int rankDifference = recentRankInt - currentRankInt;
+
+        return toGetMainLeagueResponse(difficulty, rankAndTotalSend, rankDifference);
     }
 
     /**
@@ -151,25 +155,25 @@ public class LeagueService {
     /**
      * 리그 사용자 간략한 정보 조회 (순위)
      * */
-    private Integer getLeagueRank(Member member, Integer season, Difficulty difficulty) {
+    private String getLeagueRank(Member member, Integer season, Difficulty difficulty) {
         return leagueRepository.getLeagueRank(member, season, difficulty);
     }
 
     /**
      * 홈 이달의리그 정보 조회 (순위, 완등 수)
      * */
-    private Map<String, Integer> getLeagueRankAndTotalSend(Member member, Difficulty difficulty) {
+    private Map<String, Object> getLeagueRankAndTotalSend(Member member, Difficulty difficulty) {
         return leagueRepository.getLeagueRankAndTotalSend(member, SEASON, difficulty);
     }
 
     /**
      * 홈 이달의리그 정보 조회 to dto
      * */
-    private GetMainLeagueResponse toGetMainLeagueResponse(Difficulty difficulty, Map<String, Integer> rankAndTotalSend, Integer gapRecentMonth) {
+    private GetMainLeagueResponse toGetMainLeagueResponse(Difficulty difficulty, Map<String, Object> rankAndTotalSend, Integer gapRecentMonth) {
         return GetMainLeagueResponse.builder()
                 .difficulty(difficulty.getKey())
-                .rank(rankAndTotalSend.get("rank"))
-                .totalSend(rankAndTotalSend.get("totalSend"))
+                .rank(rankAndTotalSend.get("rank").toString())
+                .totalSend((Integer) rankAndTotalSend.get("totalSend"))
                 .gapRecentMonth(gapRecentMonth)
                 .build();
     }
