@@ -9,6 +9,7 @@ import clpetition.backend.league.docs.GetLeagueRankMemberApiDocs;
 import clpetition.backend.league.docs.GetLeagueRankTopFiftyApiDocs;
 import clpetition.backend.league.dto.response.GetLeagueRankMemberResponse;
 import clpetition.backend.league.dto.response.GetLeagueRankResponse;
+import clpetition.backend.league.dto.response.GetRankResponse;
 import clpetition.backend.league.service.LeagueService;
 import clpetition.backend.member.domain.Member;
 import lombok.RequiredArgsConstructor;
@@ -33,21 +34,19 @@ public class LeagueController implements
     private final LeagueService leagueService;
 
     @PostMapping("")
-    public ResponseEntity<BaseResponse<Void>> addLeague(
+    public ResponseEntity<BaseResponse<GetRankResponse>> addLeague(
             @FindMember Member member,
             @RequestParam(value = "difficulty") String difficulty
     ) {
-        leagueService.addLeague(member, difficulty);
-        return BaseResponse.toResponseEntityContainsStatus(BaseResponseStatus.SUCCESS);
+        return BaseResponse.toResponseEntityContainsResult(leagueService.addLeague(member, difficulty));
     }
 
     @PutMapping("")
-    public ResponseEntity<BaseResponse<Void>> changeLeague(
+    public ResponseEntity<BaseResponse<GetRankResponse>> changeLeague(
             @FindMember Member member,
             @RequestParam(value = "difficulty") String difficulty
     ) {
-        leagueService.changeLeague(member, difficulty);
-        return BaseResponse.toResponseEntityContainsStatus(BaseResponseStatus.SUCCESS);
+        return BaseResponse.toResponseEntityContainsResult(leagueService.changeLeague(member, difficulty));
     }
 
     @GetMapping("/top")

@@ -2,6 +2,7 @@ package clpetition.backend.league.docs;
 
 import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
+import clpetition.backend.league.dto.response.GetRankResponse;
 import clpetition.backend.member.domain.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,7 +42,7 @@ public interface AddLeagueApiDocs {
                     ),
             }
     )
-    ResponseEntity<BaseResponse<Void>> addLeague(
+    ResponseEntity<BaseResponse<GetRankResponse>> addLeague(
             @Parameter(hidden = true)
             @FindMember Member member,
 

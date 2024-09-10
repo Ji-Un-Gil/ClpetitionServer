@@ -7,6 +7,7 @@ import clpetition.backend.league.domain.League;
 import clpetition.backend.league.dto.response.GetLeagueRankMemberResponse;
 import clpetition.backend.league.dto.response.GetLeagueRankResponse;
 import clpetition.backend.league.dto.response.GetMainLeagueResponse;
+import clpetition.backend.league.dto.response.GetRankResponse;
 import clpetition.backend.league.repository.LeagueRepository;
 import clpetition.backend.member.domain.Member;
 import lombok.RequiredArgsConstructor;
@@ -29,17 +30,21 @@ public class LeagueService {
     /**
      * 리그 추가
      * */
-    public void addLeague(Member member, String difficulty) {
+    public GetRankResponse addLeague(Member member, String difficulty) {
         isAlreadyExist(member);
         toLeague(member, difficulty);
+        String rank = getLeagueRank(member, SEASON, Difficulty.findByKey(difficulty));
+        return toGetRankResponse(rank);
     }
 
     /**
      * 리그 수정(삭제 후 저장)
      * */
-    public void changeLeague(Member member, String difficulty) {
+    public GetRankResponse changeLeague(Member member, String difficulty) {
         deleteLeague(member);
         toLeague(member, difficulty);
+        String rank = getLeagueRank(member, SEASON, Difficulty.findByKey(difficulty));
+        return toGetRankResponse(rank);
     }
 
     /**
@@ -121,6 +126,15 @@ public class LeagueService {
     private void isAlreadyExist(Member member) {
         if (leagueRepository.existsByMemberAndSeason(member, SEASON))
             throw new BaseException(BaseResponseStatus.LEAGUE_ALREADY_REGISTERED_ERROR);
+    }
+
+    /**
+     * 리그 추가, 수정 후 순위 반환 to dto
+     * */
+    private GetRankResponse toGetRankResponse(String rank) {
+        return GetRankResponse.builder()
+                .rank(rank)
+                .build();
     }
 
     /**
