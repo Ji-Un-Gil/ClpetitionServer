@@ -2,6 +2,7 @@ package clpetition.backend.league.docs;
 
 import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
+import clpetition.backend.league.dto.response.GetRankResponse;
 import clpetition.backend.member.domain.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,7 +21,7 @@ public interface ChangeLeagueApiDocs {
                     @ApiResponse(responseCode = "200", description = "🟢 정상"),
             }
     )
-    ResponseEntity<BaseResponse<Void>> changeLeague(
+    ResponseEntity<BaseResponse<GetRankResponse>> changeLeague(
             @Parameter(hidden = true)
             @FindMember Member member,
 
