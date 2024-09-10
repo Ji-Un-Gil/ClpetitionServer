@@ -87,6 +87,8 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
                     rank = String.valueOf(i + 1);
                 }
             }
+            if (totalSend == 0)
+                rank = "-";
 
             getLeagueRankResponseList.add(
                     GetLeagueRankResponse.builder()
@@ -145,6 +147,8 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
                     rank = String.valueOf(i + 1);
                 }
             }
+            if (Optional.ofNullable(result.get(totalValue)).orElse(0) == 0)
+                rank = "-";
             rankList.add(rank);
 
             // member 찾기 위한 작업
@@ -155,14 +159,10 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
         if (targetIndex == -1)
             throw new BaseException(BaseResponseStatus.LEAGUE_MEMBER_NOT_FOUND_ERROR);
 
-        // member 앞뒤 +25(예외 포함)가 되도록 범위 지정
+        // member 앞뒤 +25가 되도록 범위 지정
         int startIndex, endIndex;
         startIndex = Math.max(0, targetIndex - 25);
-        switch (targetIndex) {
-            case 0 -> endIndex = Math.min(results.size(), targetIndex + 28);
-            case 1 -> endIndex = Math.min(results.size(), targetIndex + 27);
-            default -> endIndex = Math.min(results.size(), targetIndex + 26);
-        }
+        endIndex = Math.min(results.size(), targetIndex + 26);
 
         List<GetLeagueRankResponse> getLeagueRankResponseList = new ArrayList<>();
 
@@ -232,6 +232,8 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
                     rank = String.valueOf(i + 1);
                 }
             }
+            if (Optional.ofNullable(result.get(totalValue)).orElse(0) == 0)
+                rank = "-";
             rankList.add(rank);
 
             // member 찾기 위한 작업
@@ -272,6 +274,8 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
                     rank = String.valueOf(i + 1);
                 }
             }
+            if (Optional.ofNullable(result.get(totalValue)).orElse(0) == 0)
+                rank = "-";
             rankList.add(rank);
 
             // member 찾기 위한 작업
