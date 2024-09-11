@@ -33,7 +33,7 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     private static final Integer RELATED_RECORD_SIZE = 9;
-    private static final Integer PAGE_SIZE = 10;
+    private static final Integer PAGE_SIZE = 100;
 
     @Override
     public GetRecordStatisticsPerMonthResponse findRecordStatisticsPerMonth(Member member, YearMonth yearMonth) {
