@@ -1,6 +1,6 @@
 package clpetition.backend.member.docs.dto.response;
 
-import clpetition.backend.member.dto.response.GetRecordHistoryResponse;
+import clpetition.backend.record.dto.response.GetRecordDetailsResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -12,5 +12,5 @@ public interface GetRecordHistoryPageResponseSchema {
     Boolean hasNext();
 
     @Schema(description = "(마이페이지) 사용자 등반 기록 최신순 조회 응답")
-    List<GetRecordHistoryResponse> recordHistory();
+    List<GetRecordDetailsResponse> recordHistory();
 }
