@@ -51,4 +51,7 @@ public interface GetProfileResponseSchema {
 
     @Schema(description = "리그 순위, Integer가 아닌 String임을 주의", example = "17", nullable = true)
     String rank();
+
+    @Schema(description = "팔로잉 여부(상대 프로필일 때)", example = "true", nullable = true)
+    Boolean isFollowing();
 }
