@@ -54,14 +54,18 @@ public class MemberService {
      * */
     @Transactional(readOnly = true)
     public GetProfileResponse getProfile(Member member, Long memberId) {
-        if (memberId != null)
-            member = findMemberService.getMember(memberId);
+        Boolean isFollowing = null;
+        Member findMember = member;
+        if (memberId != null) {
+            findMember = findMemberService.getMember(memberId);
+            isFollowing = followService.checkFollowing(member, findMember);
+        }
 
-        Map<String, Long> follow = followService.getFollowCount(member);
-        Profile profile = findProfile(member);
-        Long totalRecord = recordService.getTotalRecord(member);
-        Map<String, Object> leagueBrief = leagueService.getLeagueBrief(member);
-        return toGetProfileResponse(member, follow, profile, totalRecord, leagueBrief);
+        Map<String, Long> follow = followService.getFollowCount(findMember);
+        Profile profile = findProfile(findMember);
+        Long totalRecord = recordService.getTotalRecord(findMember);
+        Map<String, Object> leagueBrief = leagueService.getLeagueBrief(findMember);
+        return toGetProfileResponse(findMember, follow, profile, totalRecord, leagueBrief, isFollowing);
     }
 
     /**
@@ -101,7 +105,7 @@ public class MemberService {
     /**
      * (R) 프로필 가져오기 to dto
      * */
-    private GetProfileResponse toGetProfileResponse(Member member, Map<String, Long> follow, Profile profile, Long totalRecord, Map<String, Object> leagueBrief) {
+    private GetProfileResponse toGetProfileResponse(Member member, Map<String, Long> follow, Profile profile, Long totalRecord, Map<String, Object> leagueBrief, Boolean isFollowing) {
         return GetProfileResponse.builder()
                 .nickname(member.getNickname())
                 .profileImageUrl(member.getProfileImage())
@@ -118,6 +122,7 @@ public class MemberService {
                 .inviteCode(profile.getInviteCode())
                 .difficulty(!leagueBrief.get("difficulty").equals(Optional.empty()) ? leagueBrief.get("difficulty").toString() : null)
                 .rank(!leagueBrief.get("rank").equals(Optional.empty()) ? leagueBrief.get("rank").toString() : null)
+                .isFollowing(isFollowing)
                 .build();
     }
 
