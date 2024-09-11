@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -167,7 +168,16 @@ public class RecordService {
      * 사용자의 등반기록 최신순으로 가져오기
      * */
     public GetRecordHistoryPageResponse getRecordHistory(Member member, Long lastRecordId, boolean isMyself) {
-        return findRecordHistory(member, lastRecordId, isMyself);
+        Map<String, Object> recordHistoryMap = findRecordHistory(member, lastRecordId, isMyself);
+        List<Record> recordList = (List<Record>) recordHistoryMap.get("recordHistory");
+        List<GetRecordDetailsResponse> recordHistory = new ArrayList<>();
+        for (Record record : recordList)
+            recordHistory.add(toGetRecordDetailsResponse(record, null));
+
+        return GetRecordHistoryPageResponse.builder()
+                .hasNext((Boolean) recordHistoryMap.get("hasNext"))
+                .recordHistory(recordHistory)
+                .build();
     }
 
     /**
@@ -363,7 +373,7 @@ public class RecordService {
     /**
      * (R) 사용자의 등반기록 최신순으로 가져오기
      * */
-    private GetRecordHistoryPageResponse findRecordHistory(Member member, Long lastRecordId, boolean isMyself) {
+    private Map<String, Object> findRecordHistory(Member member, Long lastRecordId, boolean isMyself) {
         return recordRepository.findRecordHistory(member, lastRecordId, isMyself);
     }
 
