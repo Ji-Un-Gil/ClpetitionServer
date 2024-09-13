@@ -21,7 +21,15 @@ public interface DeleteRecordApiDocs {
     @Operation(summary = "등반 기록 삭제", description = "등반 기록을 삭제합니다.")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "204", description = "🟢 정상"),
+                    @ApiResponse(
+                            responseCode = "204", description = "🟢 정상 (응답 제공 X)",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    examples = @ExampleObject(
+                                            value = ""
+                                    )
+                            )
+                    ),
                     @ApiResponse(
                             responseCode = "404", description = "❌ 입력받은 등반 기록 ID가 DB에 존재하지 않거나, 현재 사용자의 등반 기록이 아님",
                             content = @Content(
