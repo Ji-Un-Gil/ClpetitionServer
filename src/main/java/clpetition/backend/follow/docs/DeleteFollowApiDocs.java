@@ -21,7 +21,15 @@ public interface DeleteFollowApiDocs {
     @Operation(summary = "팔로우 취소", description = "사용자의 팔로우 대상에서 삭제합니다.")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "204", description = "🟢 정상"),
+                    @ApiResponse(
+                            responseCode = "204", description = "🟢 정상 (응답 제공 X)",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    examples = @ExampleObject(
+                                            value = ""
+                                    )
+                            )
+                    ),
                     @ApiResponse(
                             responseCode = "404",
                             description =

@@ -21,7 +21,15 @@ public interface DeleteFavoriteGymApiDocs {
     @Operation(summary = "암장 관심 삭제", description = "사용자의 관심 암장에서 삭제합니다.")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "204", description = "🟢 정상"),
+                    @ApiResponse(
+                            responseCode = "204", description = "🟢 정상 (응답 제공 X)",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    examples = @ExampleObject(
+                                            value = ""
+                                    )
+                            )
+                    ),
                     @ApiResponse(
                             responseCode = "404",
                             description =
