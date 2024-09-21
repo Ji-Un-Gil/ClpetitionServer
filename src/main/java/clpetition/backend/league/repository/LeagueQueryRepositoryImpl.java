@@ -78,7 +78,7 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
                         Optional.ofNullable(previousResult.get(totalDays)).orElse(0L).equals(totalDay.longValue())) {
                     if (getLeagueRankResponseList.get(i - 1).rank().startsWith("T")) {
                         rank = getLeagueRankResponseList.get(i - 1).rank();
-                    } else {
+                    } else if (!getLeagueRankResponseList.get(i - 1).rank().equals("-")) {
                         rank = "T" + getLeagueRankResponseList.get(i - 1).rank();
                         GetLeagueRankResponse previousRankResponse = getLeagueRankResponseList.get(i - 1);
                         getLeagueRankResponseList.set(i - 1, previousRankResponse.toBuilder().rank(rank).build());
@@ -139,7 +139,7 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
                                 .equals(Optional.ofNullable(result.get(totalDays)).orElse(0L))) {
                     if (rankList.get(i - 1).startsWith("T")) {
                         rank = rankList.get(i - 1);
-                    } else {
+                    } else if (!rankList.get(i - 1).equals("-")) {
                         rank = "T" + rankList.get(i - 1);
                         rankList.set(i - 1, rank);
                     }

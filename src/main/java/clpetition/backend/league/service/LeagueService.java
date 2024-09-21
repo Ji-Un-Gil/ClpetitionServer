@@ -4,16 +4,17 @@ import clpetition.backend.global.response.BaseException;
 import clpetition.backend.global.response.BaseResponseStatus;
 import clpetition.backend.gym.domain.Difficulty;
 import clpetition.backend.league.domain.League;
-import clpetition.backend.league.dto.response.GetLeagueRankMemberResponse;
-import clpetition.backend.league.dto.response.GetLeagueRankResponse;
-import clpetition.backend.league.dto.response.GetMainLeagueResponse;
-import clpetition.backend.league.dto.response.GetRankResponse;
+import clpetition.backend.league.dto.response.*;
 import clpetition.backend.league.repository.LeagueRepository;
 import clpetition.backend.member.domain.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import static clpetition.backend.league.domain.League.SEASON;
 @Transactional
 public class LeagueService {
 
+    private final LeagueRankChangesService leagueRankChangesService;
     private final LeagueRepository leagueRepository;
 
     /**
@@ -45,6 +47,30 @@ public class LeagueService {
         toLeague(member, difficulty);
         String rank = getLeagueRank(member, SEASON, Difficulty.findByKey(difficulty));
         return toGetRankResponse(rank);
+    }
+
+    /**
+     * 리그 배너 조회
+     * */
+    public GetLeagueBannerResponse getLeagueBanner() {
+        StringBuilder stringBuilder = new StringBuilder();
+        List<String> bannerList = new ArrayList<>();
+        bannerList.add(
+                stringBuilder.append("D-")
+                        .append(ChronoUnit.DAYS.between(LocalDate.now(), YearMonth.now().atEndOfMonth()))
+                        .append(" 시즌 ")
+                        .append(SEASON)
+                        .append("번째 리그 진행중")
+                        .toString()
+        );
+        stringBuilder.setLength(0);
+        bannerList.add(
+                stringBuilder.append("리그 기간 동안 ")
+                        .append(leagueRankChangesService.getLeagueRankChanges())
+                        .append("번 등수가 변동됐어요!")
+                        .toString()
+        );
+        return toGetLeagueBannerResponse(bannerList);
     }
 
     /**
@@ -99,6 +125,20 @@ public class LeagueService {
         int rankDifference = recentRankInt - currentRankInt;
 
         return toGetMainLeagueResponse(difficulty, rankAndTotalSend, rankDifference);
+    }
+
+    /**
+     * 리그 사용자 순위 조회
+     * */
+    public String getLeagueRank(Member member, Difficulty difficulty) {
+        return getLeagueRank(member, SEASON, difficulty);
+    }
+
+    /**
+     * 리그 사용자 정보 조회
+     * */
+    public Optional<League> getLeagueInfo(Member member) {
+        return getLeague(member, SEASON);
     }
 
     /**
@@ -189,6 +229,15 @@ public class LeagueService {
                 .rank(rankAndTotalSend.get("rank").toString())
                 .totalSend((Integer) rankAndTotalSend.get("totalSend"))
                 .gapRecentMonth(gapRecentMonth)
+                .build();
+    }
+
+    /**
+     * 리그 배너 조회 to dto
+     * */
+    private GetLeagueBannerResponse toGetLeagueBannerResponse(List<String> bannerList) {
+        return GetLeagueBannerResponse.builder()
+                .banner(bannerList)
                 .build();
     }
 }

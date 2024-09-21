@@ -22,6 +22,9 @@ public interface GetProfileResponseSchema {
     @Schema(description = "메인 암장 ID", example = "10", nullable = true)
     Long mainGymId();
 
+    @Schema(description = "메인 암장명", example = "더클라임 클라이밍 짐앤샵 서울대점", nullable = true)
+    String mainGymName();
+
     @Schema(description = "키", example = "170", nullable = true)
     Integer height();
 

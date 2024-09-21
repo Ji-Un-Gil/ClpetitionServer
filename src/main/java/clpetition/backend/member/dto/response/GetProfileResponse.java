@@ -9,6 +9,7 @@ import java.time.LocalDate;
 public record GetProfileResponse(
         String nickname,
         Long mainGymId,
+        String mainGymName,
         LocalDate startDate,
         Integer height,
         Integer reach,

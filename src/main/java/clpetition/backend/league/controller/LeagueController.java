@@ -2,11 +2,8 @@ package clpetition.backend.league.controller;
 
 import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
-import clpetition.backend.global.response.BaseResponseStatus;
-import clpetition.backend.league.docs.AddLeagueApiDocs;
-import clpetition.backend.league.docs.ChangeLeagueApiDocs;
-import clpetition.backend.league.docs.GetLeagueRankMemberApiDocs;
-import clpetition.backend.league.docs.GetLeagueRankTopFiftyApiDocs;
+import clpetition.backend.league.docs.*;
+import clpetition.backend.league.dto.response.GetLeagueBannerResponse;
 import clpetition.backend.league.dto.response.GetLeagueRankMemberResponse;
 import clpetition.backend.league.dto.response.GetLeagueRankResponse;
 import clpetition.backend.league.dto.response.GetRankResponse;
@@ -29,7 +26,8 @@ public class LeagueController implements
         AddLeagueApiDocs,
         ChangeLeagueApiDocs,
         GetLeagueRankTopFiftyApiDocs,
-        GetLeagueRankMemberApiDocs {
+        GetLeagueRankMemberApiDocs,
+        GetLeagueBannerApiDocs {
 
     private final LeagueService leagueService;
 
@@ -47,6 +45,13 @@ public class LeagueController implements
             @RequestParam(value = "difficulty") String difficulty
     ) {
         return BaseResponse.toResponseEntityContainsResult(leagueService.changeLeague(member, difficulty));
+    }
+
+    @GetMapping("/banner")
+    public ResponseEntity<BaseResponse<GetLeagueBannerResponse>> getLeagueBanner(
+            @FindMember Member member
+    ) {
+        return BaseResponse.toResponseEntityContainsResult(leagueService.getLeagueBanner());
     }
 
     @GetMapping("/top")

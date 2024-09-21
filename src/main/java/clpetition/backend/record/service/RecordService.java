@@ -7,6 +7,8 @@ import clpetition.backend.gym.domain.Gym;
 import clpetition.backend.gym.service.FavoriteGymService;
 import clpetition.backend.gym.service.GymService;
 import clpetition.backend.gym.service.VisitsGymService;
+import clpetition.backend.league.domain.League;
+import clpetition.backend.league.service.LeagueRankChangesService;
 import clpetition.backend.league.service.LeagueService;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.dto.response.GetRecordHistoryPageResponse;
@@ -44,6 +46,7 @@ public class RecordService {
     private final FavoriteGymService favoriteGymService;
     private final FileService fileService;
     private final LeagueService leagueService;
+    private final LeagueRankChangesService leagueRankChangesService;
     private final RecordRepository recordRepository;
     private final RecordImagesRepository recordImagesRepository;
     private final DifficultiesRepository difficultiesRepository;
@@ -58,10 +61,13 @@ public class RecordService {
     public GetRecordIdResponse addRecord(Member member, AddRecordRequest addRecordRequest, List<MultipartFile> multipartFileList) {
         // 미래일 추가 불가
         // isValidDate(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)));
+        String rank = getLeagueRankChanges(member);
         List<String> imageUrlList = fileService.uploadFiles(multipartFileList, IMAGE_DIR);
         Gym gym = gymService.getGym(addRecordRequest.getGymId());
         Record record = toRecord(member, addRecordRequest, gym, imageUrlList);
         visitsGymService.increaseVisitsGym(member, gym);
+        String newRank = getLeagueRankChanges(member);
+        updateLeagueRankChanges(rank, newRank);
         return new GetRecordIdResponse(record.getId(), imageUrlList);
     }
 
@@ -90,7 +96,7 @@ public class RecordService {
     public GetRecordIdResponse changeRecord(Member member, Long recordId, AddRecordRequest addRecordRequest) {
         // 미래일 추가 불가
         // isValidDate(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)));
-
+        String rank = getLeagueRankChanges(member);
         Record record = getRecordWithValidation(member, recordId);
         Hibernate.initialize(record.getImages());
         List<String> imageUrlList = Record.convertToImageUrls(record.getImages());
@@ -101,6 +107,8 @@ public class RecordService {
         Gym gym = gymService.getGym(addRecordRequest.getGymId());
         Record newRecord = toRecord(member, addRecordRequest, gym, imageUrlList);
         visitsGymService.increaseVisitsGym(member, gym);
+        String newRank = getLeagueRankChanges(member);
+        updateLeagueRankChanges(rank, newRank);
         return new GetRecordIdResponse(newRecord.getId(), imageUrlList);
     }
 
@@ -108,10 +116,13 @@ public class RecordService {
      * 기록 삭제
      * */
     public void deleteRecord(Member member, Long recordId) {
+        String rank = getLeagueRankChanges(member);
         Record record = getRecordWithValidation(member, recordId);
         fileService.deleteFiles(Record.convertToImageUrls(record.getImages()));
         visitsGymService.decreaseVisitsGym(member, record.getGym());
         deleteRecordById(record);
+        String newRank = getLeagueRankChanges(member);
+        updateLeagueRankChanges(rank, newRank);
     }
 
     /**
@@ -195,6 +206,14 @@ public class RecordService {
      * */
     public List<Record> getRecordsAll(Member member) {
         return getRecordsAllByMember(member);
+    }
+
+    private String getLeagueRankChanges(Member member) {
+        Optional<League> league = leagueService.getLeagueInfo(member);
+        if (league.isEmpty())
+            return null;
+
+        return leagueService.getLeagueRank(member, league.get().getDifficulty());
     }
 
     /**
@@ -389,5 +408,10 @@ public class RecordService {
      * */
     private List<Record> getRecordsAllByMember(Member member) {
         return recordRepository.findByMember(member);
+    }
+
+    private void updateLeagueRankChanges(String rank, String newRank) {
+        if (rank != null && !rank.equals(newRank))
+            leagueRankChangesService.plusLeagueRankChanges();
     }
 }

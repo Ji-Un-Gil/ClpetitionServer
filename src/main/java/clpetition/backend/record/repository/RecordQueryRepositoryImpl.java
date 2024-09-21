@@ -178,7 +178,7 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
                                                 .where(record.member.eq(member))
                         )
                 )
-                .fetchOne();
+                .fetchFirst();
 
         if (lastRecordDate == null)
             return Map.of("hasNext", false, "recordHistory", new ArrayList<>());
