@@ -18,7 +18,7 @@ import java.util.Arrays;
         info = @Info(
                 title = "Clpetition API Docs",
                 description = "클피티션 API 명세서",
-                version = "v0.5.10"
+                version = "v0.5.11"
         )
 )
 @Configuration
