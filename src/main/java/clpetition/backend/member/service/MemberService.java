@@ -112,6 +112,7 @@ public class MemberService {
                 .followerCount(follow.get("follower"))
                 .followingCount(follow.get("following"))
                 .mainGymId(profile.getMainGym() != null ? profile.getMainGym().getId() : null)
+                .mainGymName(profile.getMainGym() != null ? profile.getMainGym().getName() : null)
                 .height(profile.getHeight())
                 .reach(profile.getReach())
                 .totalRecord(totalRecord)
