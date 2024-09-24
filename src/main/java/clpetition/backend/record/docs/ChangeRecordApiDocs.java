@@ -47,7 +47,7 @@ public interface ChangeRecordApiDocs {
                                     )
                             )
                     ),
-                    @ApiResponse(
+                    /*@ApiResponse(
                             responseCode = "400", description = "❌ 미래의 날짜를 등반일로 기록 시도",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -63,7 +63,7 @@ public interface ChangeRecordApiDocs {
                                     )
 
                             )
-                    ),
+                    ),*/
                     @ApiResponse(
                             responseCode = "404",
                             description =

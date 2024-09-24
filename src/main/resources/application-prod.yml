@@ -8,9 +8,11 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: false
         format_sql: true
         default_batch_fetch_size: 50
+        jdbc:
+          time_zone: Asia/Seoul

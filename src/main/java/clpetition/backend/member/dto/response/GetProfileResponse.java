@@ -8,6 +8,7 @@ import java.time.LocalDate;
 @Builder
 public record GetProfileResponse(
         String nickname,
+        Long mainGymId,
         String mainGymName,
         LocalDate startDate,
         Integer height,
@@ -21,6 +22,7 @@ public record GetProfileResponse(
         String gender,
         String inviteCode,
         String difficulty,
-        Integer rank
+        String rank,
+        Boolean isFollowing
 ) implements GetProfileResponseSchema {
 }

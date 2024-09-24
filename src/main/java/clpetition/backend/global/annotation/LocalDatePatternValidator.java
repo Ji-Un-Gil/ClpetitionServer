@@ -10,14 +10,19 @@ import java.time.format.DateTimeFormatter;
 public class LocalDatePatternValidator implements ConstraintValidator<LocalDatePattern, String> {
 
     private String pattern;
+    private boolean nullable;
 
     @Override
     public void initialize(LocalDatePattern constraintAnnotation) {
         this.pattern = constraintAnnotation.pattern();
+        this.nullable = constraintAnnotation.nullable();
     }
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (value == null)
+            return nullable;
+
         // yyyy-MM-dd
         if (value.length() > 7) {
             try {

@@ -11,6 +11,6 @@ import java.util.Map;
 public interface LeagueQueryRepository {
     List<GetLeagueRankResponse> getLeagueRankTopFifty(Integer season, Difficulty difficulty);
     GetLeagueRankMemberResponse getLeagueRankMember(Member member, Integer season, Difficulty difficulty);
-    Integer getLeagueRank(Member member, Integer season, Difficulty difficulty);
-    Map<String, Integer> getLeagueRankAndTotalSend(Member member, Integer season, Difficulty difficulty);
+    String getLeagueRank(Member member, Integer season, Difficulty difficulty);
+    Map<String, Object> getLeagueRankAndTotalSend(Member member, Integer season, Difficulty difficulty);
 }

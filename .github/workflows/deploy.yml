@@ -98,7 +98,7 @@ jobs:
         shell: bash # (6) 권한 부여
 
       - name: Build with Gradle
-        run: ./gradlew clean bootjar -Pprofile=prod --info
+        run: ./gradlew clean bootjar -Pprofile=prod -Duser.timezone=Asia/Seoul --info
         shell: bash # (8) 빌드 시작
 
       - name: Get current time
@@ -118,7 +118,6 @@ jobs:
           cp build/libs/*.jar deploy/application.jar
           cp Procfile deploy/Procfile
           cp -r .ebextensions deploy/.ebextensions
-          cp -r .platform deploy/.platform
           cd deploy && zip -r deploy.zip . -x '*.git*' './src/*' './aws/*' './node_modules/*' awscliv2.zip
 
       - name: Beanstalk Deploy

@@ -4,15 +4,17 @@ import clpetition.backend.global.response.BaseException;
 import clpetition.backend.global.response.BaseResponseStatus;
 import clpetition.backend.gym.domain.Difficulty;
 import clpetition.backend.league.domain.League;
-import clpetition.backend.league.dto.response.GetLeagueRankMemberResponse;
-import clpetition.backend.league.dto.response.GetLeagueRankResponse;
-import clpetition.backend.league.dto.response.GetMainLeagueResponse;
+import clpetition.backend.league.dto.response.*;
 import clpetition.backend.league.repository.LeagueRepository;
 import clpetition.backend.member.domain.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,22 +26,51 @@ import static clpetition.backend.league.domain.League.SEASON;
 @Transactional
 public class LeagueService {
 
+    private final LeagueRankChangesService leagueRankChangesService;
     private final LeagueRepository leagueRepository;
 
     /**
      * 리그 추가
      * */
-    public void addLeague(Member member, String difficulty) {
+    public GetRankResponse addLeague(Member member, String difficulty) {
         isAlreadyExist(member);
         toLeague(member, difficulty);
+        String rank = getLeagueRank(member, SEASON, Difficulty.findByKey(difficulty));
+        return toGetRankResponse(rank);
     }
 
     /**
      * 리그 수정(삭제 후 저장)
      * */
-    public void changeLeague(Member member, String difficulty) {
+    public GetRankResponse changeLeague(Member member, String difficulty) {
         deleteLeague(member);
         toLeague(member, difficulty);
+        String rank = getLeagueRank(member, SEASON, Difficulty.findByKey(difficulty));
+        return toGetRankResponse(rank);
+    }
+
+    /**
+     * 리그 배너 조회
+     * */
+    public GetLeagueBannerResponse getLeagueBanner() {
+        StringBuilder stringBuilder = new StringBuilder();
+        List<String> bannerList = new ArrayList<>();
+        bannerList.add(
+                stringBuilder.append("D-")
+                        .append(ChronoUnit.DAYS.between(LocalDate.now(), YearMonth.now().atEndOfMonth()))
+                        .append(" 시즌 ")
+                        .append(SEASON)
+                        .append("번째 리그 진행중")
+                        .toString()
+        );
+        stringBuilder.setLength(0);
+        bannerList.add(
+                stringBuilder.append("리그 기간 동안 ")
+                        .append(leagueRankChangesService.getLeagueRankChanges())
+                        .append("번 등수가 변동됐어요!")
+                        .toString()
+        );
+        return toGetLeagueBannerResponse(bannerList);
     }
 
     /**
@@ -67,7 +98,7 @@ public class LeagueService {
             return Map.of("difficulty", Optional.empty(), "rank", Optional.empty());
 
         Difficulty difficulty = league.get().getDifficulty();
-        Integer rank = getLeagueRank(member, SEASON, difficulty);
+        String rank = getLeagueRank(member, SEASON, difficulty);
 
         return Map.of("difficulty", difficulty.getKey(), "rank", rank);
     }
@@ -83,13 +114,31 @@ public class LeagueService {
             return GetMainLeagueResponse.builder().build();
 
         Difficulty difficulty = league.get().getDifficulty();
-        Map<String, Integer> rankAndTotalSend = getLeagueRankAndTotalSend(member, difficulty);
+        Map<String, Object> rankAndTotalSend = getLeagueRankAndTotalSend(member, difficulty);
 
         if (recentLeague.isEmpty())
             return toGetMainLeagueResponse(difficulty, rankAndTotalSend, null);
-        Integer recentRank = getLeagueRank(member, SEASON - 1, difficulty);
+        String recentRank = getLeagueRank(member, SEASON - 1, difficulty);
 
-        return toGetMainLeagueResponse(difficulty, rankAndTotalSend, recentRank - rankAndTotalSend.get("rank"));
+        int recentRankInt = Integer.parseInt(recentRank);
+        int currentRankInt = Integer.parseInt(rankAndTotalSend.get("rank").toString());
+        int rankDifference = recentRankInt - currentRankInt;
+
+        return toGetMainLeagueResponse(difficulty, rankAndTotalSend, rankDifference);
+    }
+
+    /**
+     * 리그 사용자 순위 조회
+     * */
+    public String getLeagueRank(Member member, Difficulty difficulty) {
+        return getLeagueRank(member, SEASON, difficulty);
+    }
+
+    /**
+     * 리그 사용자 정보 조회
+     * */
+    public Optional<League> getLeagueInfo(Member member) {
+        return getLeague(member, SEASON);
     }
 
     /**
@@ -120,6 +169,18 @@ public class LeagueService {
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * 리그 추가, 수정 후 순위 반환 to dto
+     * */
+    private GetRankResponse toGetRankResponse(String rank) {
+        return GetRankResponse.builder()
+                .rank(rank)
+                .build();
+    }
+
+    /**
+>>>>>>> cb653435e07147b1c61e404221c9c648ab87b065
      * 탐색할 리그에 사용자가 존재하지 않을 시 예외
      * */
     private void isExist(Member member, Difficulty difficulty) {
@@ -151,26 +212,35 @@ public class LeagueService {
     /**
      * 리그 사용자 간략한 정보 조회 (순위)
      * */
-    private Integer getLeagueRank(Member member, Integer season, Difficulty difficulty) {
+    private String getLeagueRank(Member member, Integer season, Difficulty difficulty) {
         return leagueRepository.getLeagueRank(member, season, difficulty);
     }
 
     /**
      * 홈 이달의리그 정보 조회 (순위, 완등 수)
      * */
-    private Map<String, Integer> getLeagueRankAndTotalSend(Member member, Difficulty difficulty) {
+    private Map<String, Object> getLeagueRankAndTotalSend(Member member, Difficulty difficulty) {
         return leagueRepository.getLeagueRankAndTotalSend(member, SEASON, difficulty);
     }
 
     /**
      * 홈 이달의리그 정보 조회 to dto
      * */
-    private GetMainLeagueResponse toGetMainLeagueResponse(Difficulty difficulty, Map<String, Integer> rankAndTotalSend, Integer gapRecentMonth) {
+    private GetMainLeagueResponse toGetMainLeagueResponse(Difficulty difficulty, Map<String, Object> rankAndTotalSend, Integer gapRecentMonth) {
         return GetMainLeagueResponse.builder()
                 .difficulty(difficulty.getKey())
-                .rank(rankAndTotalSend.get("rank"))
-                .totalSend(rankAndTotalSend.get("totalSend"))
+                .rank(rankAndTotalSend.get("rank").toString())
+                .totalSend((Integer) rankAndTotalSend.get("totalSend"))
                 .gapRecentMonth(gapRecentMonth)
+                .build();
+    }
+
+    /**
+     * 리그 배너 조회 to dto
+     * */
+    private GetLeagueBannerResponse toGetLeagueBannerResponse(List<String> bannerList) {
+        return GetLeagueBannerResponse.builder()
+                .banner(bannerList)
                 .build();
     }
 }

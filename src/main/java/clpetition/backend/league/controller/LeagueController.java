@@ -2,13 +2,11 @@ package clpetition.backend.league.controller;
 
 import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
-import clpetition.backend.global.response.BaseResponseStatus;
-import clpetition.backend.league.docs.AddLeagueApiDocs;
-import clpetition.backend.league.docs.ChangeLeagueApiDocs;
-import clpetition.backend.league.docs.GetLeagueRankMemberApiDocs;
-import clpetition.backend.league.docs.GetLeagueRankTopFiftyApiDocs;
+import clpetition.backend.league.docs.*;
+import clpetition.backend.league.dto.response.GetLeagueBannerResponse;
 import clpetition.backend.league.dto.response.GetLeagueRankMemberResponse;
 import clpetition.backend.league.dto.response.GetLeagueRankResponse;
+import clpetition.backend.league.dto.response.GetRankResponse;
 import clpetition.backend.league.service.LeagueService;
 import clpetition.backend.member.domain.Member;
 import lombok.RequiredArgsConstructor;
@@ -28,26 +26,32 @@ public class LeagueController implements
         AddLeagueApiDocs,
         ChangeLeagueApiDocs,
         GetLeagueRankTopFiftyApiDocs,
-        GetLeagueRankMemberApiDocs {
+        GetLeagueRankMemberApiDocs,
+        GetLeagueBannerApiDocs {
 
     private final LeagueService leagueService;
 
     @PostMapping("")
-    public ResponseEntity<BaseResponse<Void>> addLeague(
+    public ResponseEntity<BaseResponse<GetRankResponse>> addLeague(
             @FindMember Member member,
             @RequestParam(value = "difficulty") String difficulty
     ) {
-        leagueService.addLeague(member, difficulty);
-        return BaseResponse.toResponseEntityContainsStatus(BaseResponseStatus.SUCCESS);
+        return BaseResponse.toResponseEntityContainsResult(leagueService.addLeague(member, difficulty));
     }
 
     @PutMapping("")
-    public ResponseEntity<BaseResponse<Void>> changeLeague(
+    public ResponseEntity<BaseResponse<GetRankResponse>> changeLeague(
             @FindMember Member member,
             @RequestParam(value = "difficulty") String difficulty
     ) {
-        leagueService.changeLeague(member, difficulty);
-        return BaseResponse.toResponseEntityContainsStatus(BaseResponseStatus.SUCCESS);
+        return BaseResponse.toResponseEntityContainsResult(leagueService.changeLeague(member, difficulty));
+    }
+
+    @GetMapping("/banner")
+    public ResponseEntity<BaseResponse<GetLeagueBannerResponse>> getLeagueBanner(
+            @FindMember Member member
+    ) {
+        return BaseResponse.toResponseEntityContainsResult(leagueService.getLeagueBanner());
     }
 
     @GetMapping("/top")

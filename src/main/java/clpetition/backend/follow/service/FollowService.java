@@ -62,6 +62,13 @@ public class FollowService {
     }
 
     /**
+     * 팔로잉 중인 사람인지 여부 확인
+     * */
+    public Boolean checkFollowing(Member following, Member follower) {
+        return isFollowing(following, follower);
+    }
+
+    /**
      * 팔로워 가져오기
      * */
     private Member getFollower(Long followerId) {
@@ -106,5 +113,12 @@ public class FollowService {
      * */
     private Long getFollowingCount(Member member) {
         return followRepository.countFollowing(member);
+    }
+
+    /**
+     * (R) 팔로잉 중인 사람인지 여부 확인
+     * */
+    private Boolean isFollowing(Member following, Member follower) {
+        return followRepository.existsByFollowerAndFollowing(follower, following);
     }
 }

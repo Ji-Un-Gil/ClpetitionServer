@@ -2,10 +2,7 @@ package clpetition.backend.record.repository;
 
 import clpetition.backend.gym.domain.Gym;
 import clpetition.backend.member.domain.Member;
-import clpetition.backend.member.dto.response.GetRecordHistoryPageResponse;
-import clpetition.backend.member.dto.response.GetRecordHistoryResponse;
 import clpetition.backend.record.domain.Record;
-import clpetition.backend.record.domain.RecordImages;
 import clpetition.backend.record.dto.response.GetMainHistoryResponse;
 import clpetition.backend.record.dto.response.GetMainStatisticsResponse;
 import clpetition.backend.record.dto.response.GetRecordStatisticsPerMonthResponse;
@@ -24,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static clpetition.backend.gym.domain.QGym.gym;
 import static clpetition.backend.record.domain.QDifficulties.difficulties;
@@ -37,7 +33,7 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     private static final Integer RELATED_RECORD_SIZE = 9;
-    private static final Integer PAGE_SIZE = 10;
+    private static final Integer PAGE_SIZE = 100;
 
     @Override
     public GetRecordStatisticsPerMonthResponse findRecordStatisticsPerMonth(Member member, YearMonth yearMonth) {
@@ -169,7 +165,7 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
     }
 
     @Override
-    public GetRecordHistoryPageResponse findRecordHistory(Member member, Long lastRecordId, boolean isMyself) {
+    public Map<String, Object> findRecordHistory(Member member, Long lastRecordId, boolean isMyself) {
         LocalDate lastRecordDate = jpaQueryFactory
                 .select(record.date)
                 .from(record)
@@ -182,13 +178,10 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
                                                 .where(record.member.eq(member))
                         )
                 )
-                .fetchOne();
+                .fetchFirst();
 
         if (lastRecordDate == null)
-            return GetRecordHistoryPageResponse.builder()
-                    .hasNext(false)
-                    .recordHistory(new ArrayList<>())
-                    .build();
+            return Map.of("hasNext", false, "recordHistory", new ArrayList<>());
 
         List<Record> results = jpaQueryFactory
                 .selectFrom(record)
@@ -207,30 +200,6 @@ public class RecordQueryRepositoryImpl implements RecordQueryRepository {
         if (hasNext)
             results = results.subList(0, PAGE_SIZE);
 
-        return GetRecordHistoryPageResponse.builder()
-                .hasNext(hasNext)
-                .recordHistory(convertToResponse(results))
-                .build();
-    }
-
-    public List<GetRecordHistoryResponse> convertToResponse(List<Record> records) {
-        return records.stream()
-                .map(record -> {
-                    List<String> imageUrls = record.getImages().stream()
-                            .map(RecordImages::getImageUrl).toList();
-                    String thumbnail = !imageUrls.isEmpty() ? imageUrls.get(0) : "";
-
-                    Map<String, Integer> difficultiesMap = GetRecordHistoryResponse.convertDifficulties(record.getDifficulties());
-
-                    return GetRecordHistoryResponse.builder()
-                            .recordId(record.getId())
-                            .gymName(record.getGym().getName())
-                            .exerciseTime(record.getExerciseTime())
-                            .date(record.getDate())
-                            .difficulties(difficultiesMap)
-                            .thumbnail(thumbnail)
-                            .build();
-                })
-                .collect(Collectors.toList());
+        return Map.of("hasNext", hasNext, "recordHistory", results);
     }
 }

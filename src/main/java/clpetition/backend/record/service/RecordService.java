@@ -7,6 +7,8 @@ import clpetition.backend.gym.domain.Gym;
 import clpetition.backend.gym.service.FavoriteGymService;
 import clpetition.backend.gym.service.GymService;
 import clpetition.backend.gym.service.VisitsGymService;
+import clpetition.backend.league.domain.League;
+import clpetition.backend.league.service.LeagueRankChangesService;
 import clpetition.backend.league.service.LeagueService;
 import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.dto.response.GetRecordHistoryPageResponse;
@@ -28,6 +30,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -43,6 +46,7 @@ public class RecordService {
     private final FavoriteGymService favoriteGymService;
     private final FileService fileService;
     private final LeagueService leagueService;
+    private final LeagueRankChangesService leagueRankChangesService;
     private final RecordRepository recordRepository;
     private final RecordImagesRepository recordImagesRepository;
     private final DifficultiesRepository difficultiesRepository;
@@ -55,11 +59,15 @@ public class RecordService {
      * 기록 추가
      * */
     public GetRecordIdResponse addRecord(Member member, AddRecordRequest addRecordRequest, List<MultipartFile> multipartFileList) {
-        isValidDate(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)));
+        // 미래일 추가 불가
+        // isValidDate(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)));
+        String rank = getLeagueRankChanges(member);
         List<String> imageUrlList = fileService.uploadFiles(multipartFileList, IMAGE_DIR);
         Gym gym = gymService.getGym(addRecordRequest.getGymId());
         Record record = toRecord(member, addRecordRequest, gym, imageUrlList);
         visitsGymService.increaseVisitsGym(member, gym);
+        String newRank = getLeagueRankChanges(member);
+        updateLeagueRankChanges(rank, newRank);
         return new GetRecordIdResponse(record.getId(), imageUrlList);
     }
 
@@ -86,8 +94,9 @@ public class RecordService {
      * 기록 수정(삭제 후 저장)
      * */
     public GetRecordIdResponse changeRecord(Member member, Long recordId, AddRecordRequest addRecordRequest) {
-        isValidDate(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)));
-
+        // 미래일 추가 불가
+        // isValidDate(LocalDate.parse(addRecordRequest.getDate(), DateTimeFormatter.ofPattern(DATE_PATTERN)));
+        String rank = getLeagueRankChanges(member);
         Record record = getRecordWithValidation(member, recordId);
         Hibernate.initialize(record.getImages());
         List<String> imageUrlList = Record.convertToImageUrls(record.getImages());
@@ -98,6 +107,8 @@ public class RecordService {
         Gym gym = gymService.getGym(addRecordRequest.getGymId());
         Record newRecord = toRecord(member, addRecordRequest, gym, imageUrlList);
         visitsGymService.increaseVisitsGym(member, gym);
+        String newRank = getLeagueRankChanges(member);
+        updateLeagueRankChanges(rank, newRank);
         return new GetRecordIdResponse(newRecord.getId(), imageUrlList);
     }
 
@@ -105,10 +116,13 @@ public class RecordService {
      * 기록 삭제
      * */
     public void deleteRecord(Member member, Long recordId) {
+        String rank = getLeagueRankChanges(member);
         Record record = getRecordWithValidation(member, recordId);
         fileService.deleteFiles(Record.convertToImageUrls(record.getImages()));
         visitsGymService.decreaseVisitsGym(member, record.getGym());
         deleteRecordById(record);
+        String newRank = getLeagueRankChanges(member);
+        updateLeagueRankChanges(rank, newRank);
     }
 
     /**
@@ -165,7 +179,16 @@ public class RecordService {
      * 사용자의 등반기록 최신순으로 가져오기
      * */
     public GetRecordHistoryPageResponse getRecordHistory(Member member, Long lastRecordId, boolean isMyself) {
-        return findRecordHistory(member, lastRecordId, isMyself);
+        Map<String, Object> recordHistoryMap = findRecordHistory(member, lastRecordId, isMyself);
+        List<Record> recordList = (List<Record>) recordHistoryMap.get("recordHistory");
+        List<GetRecordDetailsResponse> recordHistory = new ArrayList<>();
+        for (Record record : recordList)
+            recordHistory.add(toGetRecordDetailsResponse(record, null));
+
+        return GetRecordHistoryPageResponse.builder()
+                .hasNext((Boolean) recordHistoryMap.get("hasNext"))
+                .recordHistory(recordHistory)
+                .build();
     }
 
     /**
@@ -185,8 +208,16 @@ public class RecordService {
         return getRecordsAllByMember(member);
     }
 
+    private String getLeagueRankChanges(Member member) {
+        Optional<League> league = leagueService.getLeagueInfo(member);
+        if (league.isEmpty())
+            return null;
+
+        return leagueService.getLeagueRank(member, league.get().getDifficulty());
+    }
+
     /**
-     * 기록할 일자가 미래인 경우 오류
+     * 기록할 일자가 미래인 경우 오류 (정책 변경으로 보류)
      * */
     private void isValidDate(LocalDate date) {
         if (date.isAfter(LocalDate.now()))
@@ -252,7 +283,7 @@ public class RecordService {
                 .profileImageUrl(member.getProfileImage())
                 .nickname(member.getNickname())
                 .difficulty(!leagueBrief.get("difficulty").equals(Optional.empty()) ? leagueBrief.get("difficulty").toString() : null)
-                .rank(!leagueBrief.get("rank").equals(Optional.empty()) ? Integer.parseInt(leagueBrief.get("rank").toString()) : null)
+                .rank(!leagueBrief.get("rank").equals(Optional.empty()) ? leagueBrief.get("rank").toString() : null)
                 .build();
     }
 
@@ -361,7 +392,7 @@ public class RecordService {
     /**
      * (R) 사용자의 등반기록 최신순으로 가져오기
      * */
-    private GetRecordHistoryPageResponse findRecordHistory(Member member, Long lastRecordId, boolean isMyself) {
+    private Map<String, Object> findRecordHistory(Member member, Long lastRecordId, boolean isMyself) {
         return recordRepository.findRecordHistory(member, lastRecordId, isMyself);
     }
 
@@ -377,5 +408,10 @@ public class RecordService {
      * */
     private List<Record> getRecordsAllByMember(Member member) {
         return recordRepository.findByMember(member);
+    }
+
+    private void updateLeagueRankChanges(String rank, String newRank) {
+        if (rank != null && !rank.equals(newRank))
+            leagueRankChangesService.plusLeagueRankChanges();
     }
 }

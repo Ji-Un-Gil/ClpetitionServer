@@ -19,7 +19,10 @@ public interface GetProfileResponseSchema {
     @Schema(description = "팔로잉 수", example = "113")
     Long followingCount();
 
-    @Schema(description = "대표 암장명", example = "더클라임 신림점", nullable = true)
+    @Schema(description = "메인 암장 ID", example = "10", nullable = true)
+    Long mainGymId();
+
+    @Schema(description = "메인 암장명", example = "더클라임 클라이밍 짐앤샵 서울대점", nullable = true)
     String mainGymName();
 
     @Schema(description = "키", example = "170", nullable = true)
@@ -49,6 +52,9 @@ public interface GetProfileResponseSchema {
     @Schema(description = "리그 난이도", example = "주황", nullable = true)
     String difficulty();
 
-    @Schema(description = "리그 순위", example = "17", nullable = true)
-    Integer rank();
+    @Schema(description = "리그 순위, Integer가 아닌 String임을 주의", example = "17", nullable = true)
+    String rank();
+
+    @Schema(description = "팔로잉 여부(상대 프로필일 때)", example = "true", nullable = true)
+    Boolean isFollowing();
 }
