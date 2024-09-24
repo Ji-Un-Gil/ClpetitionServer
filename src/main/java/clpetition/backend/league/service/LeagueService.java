@@ -169,8 +169,6 @@ public class LeagueService {
     }
 
     /**
-<<<<<<< HEAD
-=======
      * 리그 추가, 수정 후 순위 반환 to dto
      * */
     private GetRankResponse toGetRankResponse(String rank) {
@@ -180,7 +178,6 @@ public class LeagueService {
     }
 
     /**
->>>>>>> cb653435e07147b1c61e404221c9c648ab87b065
      * 탐색할 리그에 사용자가 존재하지 않을 시 예외
      * */
     private void isExist(Member member, Difficulty difficulty) {
