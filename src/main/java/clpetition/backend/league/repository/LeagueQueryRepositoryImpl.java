@@ -249,7 +249,6 @@ public class LeagueQueryRepositoryImpl implements LeagueQueryRepository {
         return rank;
     }
 
-    @Override
     public Map<String, Object> getLeagueRankAndTotalSend(Member member, Integer season, Difficulty difficulty) {
         List<Tuple> results = fetchRank(season, difficulty);
 
