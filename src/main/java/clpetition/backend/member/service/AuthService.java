@@ -4,13 +4,13 @@ import clpetition.backend.follow.service.FollowService;
 import clpetition.backend.global.infra.file.FileService;
 import clpetition.backend.gym.domain.FavoriteGym;
 import clpetition.backend.gym.service.GymService;
+import clpetition.backend.member.domain.Member;
 import clpetition.backend.member.domain.Profile;
+import clpetition.backend.member.domain.Role;
+import clpetition.backend.member.domain.SocialType;
 import clpetition.backend.member.dto.request.AddMemberAgreementRequest;
 import clpetition.backend.member.dto.request.SocialLoginRequest;
 import clpetition.backend.member.dto.response.SocialLoginResponse;
-import clpetition.backend.member.domain.Member;
-import clpetition.backend.member.domain.Role;
-import clpetition.backend.member.domain.SocialType;
 import clpetition.backend.member.repository.MemberRepository;
 import clpetition.backend.member.repository.ProfileRepository;
 import clpetition.backend.record.domain.Record;
@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +41,7 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final ProfileRepository profileRepository;
     private StringBuilder stringBuilder;
-    private static final Integer RANDOM_NICKNAME_LENGTH = 3;
+    private static final String RANDOM_NICKNAME_TEMPLATE = "익명다람쥐";
     private static final Integer RANDOM_INVITE_CODE_LENGTH = 5;
 
     public SocialLoginResponse socialLogin(SocialLoginRequest socialLoginRequest) {
@@ -150,19 +151,17 @@ public class AuthService {
         EmojiParser.removeAllEmojis(nickname);
         nickname = nickname.replaceAll("[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]", "");
 
-        // 닉네임 6자리 이상 시, 5자리로 자르기
-        if (nickname.length() > 5) {
-            nickname = nickname.substring(0, 5);
-        }
+        // 닉네임 6자리 초과 시, 6자리로 자르기
+        if (nickname.length() > 6)
+            nickname = nickname.substring(0, 6);
 
-        // 분기 처리, 닉네임 중복 또는 공백 시 뒤에 랜덤값 추가
-        stringBuilder = new StringBuilder();
-        if (nickname.isBlank() || checkNickname(stringBuilder.append(nickname).append("람쥐").toString()))
+        // 분기 처리, 닉네임 공백 시 랜덤 닉네임 부여
+        if (nickname.isBlank())
+            nickname = createTemporaryNickname(RANDOM_NICKNAME_TEMPLATE);
+
+        // 분기 처리, 닉네임 중복 시 뒤에 랜덤값 추가
+        if (checkNickname(nickname))
             nickname = createTemporaryNickname(nickname);
-
-        // "람쥐" 추가
-        stringBuilder = new StringBuilder();
-        nickname = stringBuilder.append(nickname).append("람쥐").toString();
 
         return Member.builder()
                 .socialId(socialId)
@@ -184,10 +183,20 @@ public class AuthService {
     }
 
     private String createTemporaryNickname(String nickname) {
+        String newNickname = getNewNickname(nickname);
+        while (checkNickname(newNickname))
+            newNickname = getNewNickname(nickname);
+
+        return newNickname;
+    }
+
+    private String getNewNickname(String nickname) {
         stringBuilder = new StringBuilder();
+        Random random = new Random();
         return stringBuilder
                 .append(nickname)
-                .append(RandomStringUtils.randomAlphabetic(RANDOM_NICKNAME_LENGTH))
+                .append((!nickname.equals(RANDOM_NICKNAME_TEMPLATE)) ?
+                        String.format("%04d", random.nextInt(10000)) : String.format("%05d", random.nextInt(100000)))
                 .toString();
     }
 
