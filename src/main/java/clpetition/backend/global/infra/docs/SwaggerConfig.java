@@ -18,7 +18,7 @@ import java.util.Arrays;
         info = @Info(
                 title = "Clpetition API Docs",
                 description = "클피티션 API 명세서",
-                version = "v0.6.0"
+                version = "v0.7.0"
         )
 )
 @Configuration
@@ -30,6 +30,7 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         ArrayList<Server> servers = new ArrayList<>();
         servers.add(new Server().url("https://www.clpetition-server.shop/").description("prod"));
+        servers.add(new Server().url("https://localhost:8080").description("dev_ssl"));
         servers.add(new Server().url("http://localhost:8080").description("dev"));
 
         SecurityScheme securityScheme = new SecurityScheme()
