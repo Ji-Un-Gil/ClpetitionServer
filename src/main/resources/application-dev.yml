@@ -16,3 +16,5 @@ spring:
         default_batch_fetch_size: 50
         jdbc:
           time_zone: Asia/Seoul
+instagram:
+  callback-uri: "https://localhost:8080/auth/instagram/callback"
