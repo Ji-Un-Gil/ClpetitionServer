@@ -45,7 +45,7 @@ public interface GetLatestAppVersionApiDocs {
             @Parameter(hidden = true)
             @FindMember Member member,
 
-            @Parameter(description = "앱 타입", example = "iOS")
-            @RequestParam(value = "type") String appType
+            @Parameter(description = "앱 타입", example = "AOS")
+            @RequestParam(value = "type", required = false, defaultValue = "iOS") String appType
     );
 }
