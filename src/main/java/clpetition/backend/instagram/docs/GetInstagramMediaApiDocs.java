@@ -1,8 +1,8 @@
-package clpetition.backend.appVersion.docs;
+package clpetition.backend.instagram.docs;
 
-import clpetition.backend.appVersion.dto.response.GetLatestAppVersionResponse;
 import clpetition.backend.global.annotation.FindMember;
 import clpetition.backend.global.response.BaseResponse;
+import clpetition.backend.instagram.dto.response.GetInstagramMediaResponse;
 import clpetition.backend.member.domain.Member;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,25 +14,25 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.GetMapping;
 
-@Tag(name = "App Version API", description = "앱 버전 API")
-public interface GetLatestAppVersionApiDocs {
+@Tag(name = "Instagram API", description = "인스타그램 API")
+public interface GetInstagramMediaApiDocs {
 
-    @Operation(summary = "앱 최신 버전 조회", description = "앱 최신 버전을 조회합니다.")
+    @Operation(summary = "인스타그램 사용자 미디어 조회 API", description = "인스타그램 사용자 미디어를 조회합니다.")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "🟢 정상"),
                     @ApiResponse(
-                            responseCode = "404", description = "❌ 앱 타입(iOS, AOS)이 존재하지 않음",
+                            responseCode = "401", description = "❌ 인스타그램 로그인이 안 되어 있는 사용자로 조회 시도",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = BaseResponse.class),
                                     examples = @ExampleObject(
                                             value = """
                                             {
-                                                "code": "APP_VERSION_001",
-                                                "message": "존재하지 않는 애플리케이션 타입입니다.",
+                                                "code": "INSTAGRAM_001",
+                                                "message": "인스타그램 로그인 후 이용해주세요.",
                                                 "result": null
                                             }
                                             """
@@ -41,11 +41,9 @@ public interface GetLatestAppVersionApiDocs {
                     ),
             }
     )
-    ResponseEntity<BaseResponse<GetLatestAppVersionResponse>> getLatestAppVersion(
+    @GetMapping("/media")
+    ResponseEntity<BaseResponse<GetInstagramMediaResponse>> getInstagramMedia(
             @Parameter(hidden = true)
-            @FindMember Member member,
-
-            @Parameter(description = "앱 타입", example = "iOS")
-            @RequestParam(value = "type") String appType
+            @FindMember Member member
     );
 }

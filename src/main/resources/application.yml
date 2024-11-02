@@ -10,6 +10,24 @@ spring:
     host: ${redis.host}
     port: ${redis.port}
 
+  security:
+    oauth2:
+      client:
+        registration:
+          instagram:
+            client-id: ${instagram.client.id}
+            client-secret: ${instagram.client.secret}
+            redirect-uri: "{baseUrl}/login/oauth2/code/instagram"
+            scope: user_profile, user_media
+            authorization-grant-type: authorization_code
+            client-name: Instagram
+        provider:
+          instagram:
+            authorization-uri: https://api.instagram.com/oauth/authorize
+            long-authorization-uri: https://graph.instagram.com/access_token
+            token-uri: https://api.instagram.com/oauth/access_token
+            user-info-uri: https://graph.instagram.com/me
+
 jwt:
   token:
     secret-key: ${jwt.secret}
@@ -40,6 +58,14 @@ logging:
       amazonaws:
         util:
           EC2MetadataUtils: error
+
+server:
+  ssl:
+    enabled: true
+    key-store: dev.key
+    key-store-password: 123456
+    key-store-type: PKCS12
+    key-alias: bns-ssl
 
 ---
 
