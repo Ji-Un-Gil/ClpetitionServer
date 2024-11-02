@@ -16,7 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Tag(name = "App Version API", description = "iOS 앱 버전 API")
+@Tag(name = "App Version API", description = "앱 버전 API")
 public interface AddAppVersionApiDocs {
 
     @Operation(summary = "앱 버전 최신화", description = "앱 버전을 저장합니다.")
@@ -38,11 +38,30 @@ public interface AddAppVersionApiDocs {
                                     )
                             )
                     ),
+                    @ApiResponse(
+                            responseCode = "404", description = "❌ 앱 타입(iOS, AOS)이 존재하지 않음",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = BaseResponse.class),
+                                    examples = @ExampleObject(
+                                            value = """
+                                            {
+                                                "code": "APP_VERSION_001",
+                                                "message": "존재하지 않는 애플리케이션 타입입니다.",
+                                                "result": null
+                                            }
+                                            """
+                                    )
+                            )
+                    ),
             }
     )
     ResponseEntity<BaseResponse<Void>> addAppVersion(
             @Parameter(hidden = true)
             @FindMember Member member,
+
+            @Parameter(description = "앱 타입", example = "iOS")
+            @RequestParam(value = "type") String appType,
 
             @Parameter(description = "버전", example = "1.1.0")
             @RequestParam(value = "version") @VersionPattern String version

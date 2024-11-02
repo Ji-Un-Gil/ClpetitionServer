@@ -83,6 +83,11 @@ public enum BaseResponseStatus implements BaseResponseStatusImpl {
     // Reminder
     REMINDER_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "REMINDER_001", "존재하지 않는 알림입니다."),
 
+    // AppVersion
+    APP_TYPE_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "APP_VERSION_001", "존재하지 않는 애플리케이션 타입입니다."),
+
+    // Instagram
+    INVALID_INSTAGRAM_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "INSTAGRAM_001", "인스타그램 로그인 후 이용해주세요."),
 
     /**
      * 500 : 응답 실패

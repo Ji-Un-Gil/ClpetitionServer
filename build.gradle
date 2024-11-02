@@ -43,6 +43,9 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+	// OAuth
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
 	// Querydsl
 	implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
 	implementation "com.querydsl:querydsl-apt:5.0.0:jakarta"
@@ -74,6 +77,7 @@ dependencies {
 
 	// Web
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 tasks.named('test') {
