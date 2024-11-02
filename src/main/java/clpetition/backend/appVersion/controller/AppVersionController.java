@@ -29,7 +29,7 @@ public class AppVersionController implements
     @PostMapping("")
     public ResponseEntity<BaseResponse<Void>> addAppVersion(
             @FindMember Member member,
-            @RequestParam(value = "type") String appType,
+            @RequestParam(value = "type", required = false, defaultValue = "iOS") String appType,
             @RequestParam(value = "version") @VersionPattern String version
     ) {
         appVersionService.addAppVersion(appType, version);
@@ -39,7 +39,7 @@ public class AppVersionController implements
     @GetMapping("")
     public ResponseEntity<BaseResponse<GetLatestAppVersionResponse>> getLatestAppVersion(
             @FindMember Member member,
-            @RequestParam(value = "type") String appType
+            @RequestParam(value = "type", required = false, defaultValue = "iOS") String appType
     ) {
         return BaseResponse.toResponseEntityContainsResult(appVersionService.getLatestAppVersion(appType));
     }
